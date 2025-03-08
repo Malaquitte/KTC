@@ -24,30 +24,7 @@ Universal Toolchanger helper for Klipper
   </a>
 </p>
 
-This adds logic to [Klipper](https://github.com/Klipper3d/klipper) for layered, inherited ToolChanging functionality.
-
-This is a complete rewrite of KTCC v.1 to be more versatile and have infinite levels of toolchangers. Inspiration comes mainly from how RRF enables toolchanging and from the HappyHare project.
-
-I welcome any and all input and contributions. Don't be afraid to make a pull request :D
-
-Complex code example is still under construction.
-
-Thank you!
-
-## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Major features:
-<ul>
-  <li>Support any type of toolchanger and any type of tool.</li>
-  <li>Infinite levels of nested changers and tools with inheritance.</li>
-  <li>Handles Tool temperature transfers on tool select/deselect with multiple heaters and offsets.</li>
-  <li>Standby temperatures for parked tools.</li>
-  <li>Handles multiple fans per tool and speed transfer between tools.</li>
-  <li>Wait to reach temperature with configurable tolerance for tool.</li>
-  <li>Unlimited parameters for each object, accesible by macros.</li>
-  <li>Tool number maping. Remap a tool to another, no need to reslice.</li>
-  <li>Persitance of state and statistics across restarts.</li>
-</ul>
-
-<br>
+This is a fork of [KTC V2](https://github.com/TypQxQ/KTC).
 
 ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Installation
 
