@@ -28,12 +28,12 @@ This is a fork of [KTC V2](https://github.com/TypQxQ/KTC).
 
 ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Installation
 
-The code requires Klipper to run on Python v.3 and is not compatible with Python v.2.
+The code requires Klipper to run on Python v.3 only.
 
 ### 1\. Automatic install with Moonraker autoupdate support
 Connect to your klipper machine using SSH and run this one line command:
 ```
-cd ~/ && git clone https://github.com/TypQxQ/KTC.git && bash ~/KTC/install.sh
+cd ~/ && git clone https://github.com/Malaquitte/KTC.git && bash ~/KTC/install.sh
 ```
 
 Configure away inside printer.cfg or a file referenced by it.
@@ -43,13 +43,13 @@ Copy or link the python (`*.py`) files into the `\klipper\klippy\extras` directo
 
 Copy the macros inside the macros folder and reference them in printer.cfg.
 
+`[include ktc/config/toolchanger.cfg]`
+`[include ktc/macros/tool_macros.cfg]`
+
 ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Minimum Configuration:
 * At least one tool needs to be defined, ex:
 
  `[ktc_tool 0]`
-
-## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Help and community:
-[The discution forums here on Github](https://github.com/TypQxQ/KTC/discussions)
 
 ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Configuration Examples:
 Configuration example can be found here:
