@@ -43,8 +43,10 @@ Copy or link the python (`*.py`) files into the `\klipper\klippy\extras` directo
 
 Copy the macros inside the macros folder and reference them in printer.cfg.
 
-`[include ktc/config/toolchanger.cfg]`
-`[include ktc/macros/tool_macros.cfg]`
+```
+[include ktc/config/toolchanger.cfg]
+[include ktc/macros/tool_macros.cfg]
+```
 
 ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Minimum Configuration:
 * At least one tool needs to be defined, ex:
