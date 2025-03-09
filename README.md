@@ -7,16 +7,16 @@ Universal Toolchanger helper for Klipper
 </p>
 
 <p align="center">
-  <a aria-label="Downloads" href="https://github.com/TypQxQ/KTC/releases">
-    <img src="https://img.shields.io/github/release/TypQxQ/KTC?display_name=tag&style=flat-square"  alt="Downloads Badge">
+  <a aria-label="Downloads" href="https://github.com/Malaquitte/KTC/releases">
+    <img src="https://img.shields.io/github/release/Malaquitte/KTC?display_name=tag&style=flat-square"  alt="Downloads Badge">
   </a>
-  <a aria-label="Stars" href="https://github.com/TypQxQ/KTC/stargazers">
+  <a aria-label="Stars" href="https://github.com/Malaquitte/KTC/stargazers">
     <img src="https://img.shields.io/github/stars/TypQxQ/KTC?style=flat-square"  alt="Stars Badge">
   </a>
-  <a aria-label="Forks" href="https://github.com/TypQxQ/KTC/network/members">
+  <a aria-label="Forks" href="https://github.com/Malaquitte/KTC/network/members">
     <img src="https://img.shields.io/github/forks/TypQxQ/KTC?style=flat-square" alt="Forks Badge">
   </a>
-  <a aria-label="License" href="https://github.com/TypQxQ/KTC/blob/master/LICENSE">
+  <a aria-label="License" href="https://github.com/Malaquitte/KTC/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/TypQxQ/KTC?style=flat-square" alt="License Badge">
   </a>
   <a aria-label="Codacy Badge" href="https://app.codacy.com/gh/TypQxQ/KTC/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade">
