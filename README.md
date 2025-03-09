@@ -11,15 +11,15 @@ Universal Toolchanger helper for Klipper
     <img src="https://img.shields.io/github/release/Malaquitte/KTC?display_name=tag&style=flat-square"  alt="Downloads Badge">
   </a>
   <a aria-label="Stars" href="https://github.com/Malaquitte/KTC/stargazers">
-    <img src="https://img.shields.io/github/stars/TypQxQ/KTC?style=flat-square"  alt="Stars Badge">
+    <img src="https://img.shields.io/github/stars/Malaquitte/KTC?style=flat-square"  alt="Stars Badge">
   </a>
   <a aria-label="Forks" href="https://github.com/Malaquitte/KTC/network/members">
-    <img src="https://img.shields.io/github/forks/TypQxQ/KTC?style=flat-square" alt="Forks Badge">
+    <img src="https://img.shields.io/github/forks/Malaquitte/KTC?style=flat-square" alt="Forks Badge">
   </a>
   <a aria-label="License" href="https://github.com/Malaquitte/KTC/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/TypQxQ/KTC?style=flat-square" alt="License Badge">
+    <img src="https://img.shields.io/github/license/Malaquitte/KTC?style=flat-square" alt="License Badge">
   </a>
-  <a aria-label="Codacy Badge" href="https://app.codacy.com/gh/TypQxQ/KTC/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade">
+  <a aria-label="Codacy Badge" href="https://app.codacy.com/gh/Malaquitte/KTC/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade">
     <img src="https://app.codacy.com/project/badge/Grade/2ba035ce6a444b889d3e9afcd5e9ec87" alt="Codacy Badge">
   </a>
 </p>
