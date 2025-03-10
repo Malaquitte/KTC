@@ -136,6 +136,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             "KTC_HEATERS_PAUSE",
             "KTC_HEATERS_RESUME",
             "KTC_TOOLCHANGER_INITIALIZE",
+            "KTC_TOOLCHANGERS_DISPLAY",
             "KTC_TOOLS_DISPLAY",
             "KTC_TOOL_MAP_NR",
             "KTC_DEBUG_HEATERS",
@@ -841,6 +842,37 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
     ###########################################
     # TOOL REMAPING                           #
     ###########################################
+
+    def _toolchangers_status_to_human_string(self):
+        msg = "KTC ToolToolChangers registered:"
+
+        for toolchanger in self.all_toolchangers.values():
+            msg += f"\n  ToolChanger Name: {toolchanger.name}"
+            msg += f"\n  State: {toolchanger.state}"
+            msg += f"\n  Selected Tool: {toolchanger._selected_tool.name}"
+            msg += "\n  Tools configured for this Toolchanger:"
+            for tool in toolchanger.tools.values():
+                if tool.number is None:
+                    toolnr = ""
+                else:
+                    toolnr = str(tool.number)
+                msg += f"\n    (KTC_T{toolnr}"
+                msg += " " * (2 - len(toolnr))
+                msg += f") {tool.name}"
+                if tool._ktc.active_tool.name != "":
+                    msg += f"  Active Tool: {tool._ktc.active_tool.name}"
+                else:
+                    msg += "  Active Tool is empty."
+        return msg
+
+    cmd_KTC_TOOLCHANGERS_DISPLAY_help = (
+        "Display the current status of all toolchangers."
+    )
+
+    def cmd_KTC_TOOLCHANGERS_DISPLAY(
+        self, gcmd
+    ):  # pylint: disable=invalid-name, unused-argument
+        self.log.always(self._toolchangers_status_to_human_string())
 
     def _tool_map_to_human_string(self):
         msg = "KTC Tools registered:"
