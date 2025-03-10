@@ -117,6 +117,7 @@ class KtcToolchanger(KtcBaseChangerClass, KtcConstantsClass):
 
         # Run the init gcode template if it is defined.
         if self._init_gcode != "":
+            self.log.debug(f"Executing _init_gcode of ktc_toolchanger {self.name}.")
             self.log.trace(f"Initalizing ktc_toolchanger {self.name}.")
             init_gcode_template = self.gcode_macro.load_template(   # type: ignore
                 self.config, "", self._init_gcode)
@@ -134,6 +135,7 @@ class KtcToolchanger(KtcBaseChangerClass, KtcConstantsClass):
                     + "change the state to READY."
                 )
         else:
+            self.log.debug(f"Setting state of ktc_toolchanger {self.name} to READY.")
             self.state = self.StateType.READY
 
         # Set the tool as engaged. Fir tools it is equivalent to selected.
