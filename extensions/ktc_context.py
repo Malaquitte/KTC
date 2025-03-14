@@ -25,13 +25,13 @@ def check_tool_endstop_configuration(ktc_instance):
                 stepper_name = endstop_name
                 
             # Récupérer l'objet stepper et son état d'endstop
-            manual_stepper = self.printer.lookup_object(stepper_name)
-            endstop_state = manual_stepper.get_status(self.printer.get_reactor().monotonic())["endstop_state"]
+            manual_stepper = ktc_instance.printer.lookup_object(stepper_name)
+            endstop_state = manual_stepper.get_status(ktc_instance.printer.get_reactor().monotonic())["endstop_state"]
             
             # True = endstop déclenché (détection)
             return endstop_state
         except Exception as e:
-            self.log.always(f"Erreur lors de la lecture de l'endstop {endstop_name}: {str(e)}")
+            ktc_instance.log.always(f"Erreur lors de la lecture de l'endstop {endstop_name}: {str(e)}")
             return None
     
     # Récupérer les états des endstops
@@ -49,26 +49,26 @@ def check_tool_endstop_configuration(ktc_instance):
     if all(dock_states.values()) and tc_state is True:
         # Cas 1: Tous les outils sont sur les docks mais le toolchanger indique qu'un outil est attaché
         error_msg = "Tous les outils sont sur leurs docks mais le toolchanger indique qu'un outil est attaché"
-        self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
+        ktc_instance.log.always(f"ERREUR ENDSTOPS: {error_msg}")
         return False, error_msg
         
     elif tc_state is True and tools_off_dock != 1:
         # Cas 2: Le toolchanger a un outil, mais le nombre d'outils absents n'est pas exactement 1
         error_msg = f"Le toolchanger a un outil, mais {tools_off_dock} outils sont absents de leurs docks (devrait être exactement 1)"
-        self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
+        ktc_instance.log.always(f"ERREUR ENDSTOPS: {error_msg}")
         return False, error_msg
         
     elif tc_state is False and tools_off_dock > 0:
         # Cas 3: Le toolchanger n'a pas d'outil, mais certains outils sont absents de leurs docks
         error_msg = f"Le toolchanger n'a pas d'outil, mais {tools_off_dock} outils sont absents de leurs docks"
-        self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
+        ktc_instance.log.always(f"ERREUR ENDSTOPS: {error_msg}")
         return False, error_msg
     
     # Si nous arrivons ici, la configuration est valide
     if tools_off_dock == 0:
-        self.log.trace("ENDSTOPS OK: Tous les outils sont sur leurs docks et le toolchanger est vide")
+        ktc_instance.log.trace("ENDSTOPS OK: Tous les outils sont sur leurs docks et le toolchanger est vide")
     else:
         missing_docks = [dock for dock, state in dock_states.items() if state is False]
-        self.log.trace(f"ENDSTOPS OK: L'outil du dock {missing_docks[0]} est attaché au toolchanger")
+        ktc_instance.log.trace(f"ENDSTOPS OK: L'outil du dock {missing_docks[0]} est attaché au toolchanger")
     
     return True, "Configuration des endstops valide"
