@@ -1168,12 +1168,19 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                     # Récupère les résultats
                     if hasattr(self.printer, 'query_endstops'):
                         query_endstops = self.printer.lookup_object('query_endstops')
+                        self.log.always("query_endstops trouvé")
                         if hasattr(query_endstops, 'last_query'):
                             # La structure dépend de l'implémentation exacte
                             return query_endstops.last_query.get(endstop_name, False)
                     
                     # Si rien n'a fonctionné, on suppose que l'endstop n'est pas déclenché
                     self.log.always(f"Impossible de déterminer l'état de l'endstop {endstop_name}, supposé non déclenché")
+                    # Dernière tentative
+                    self.log.always("Retrieving endstops")
+                    endstops = self.printer.query_endstops()
+                    self.log.always("Displaying endstops state")
+                    for name, state in endstops.items():
+                        self.log.always(f"Endstop {name}: {state}")
                     return False
                     
             except Exception as e:
