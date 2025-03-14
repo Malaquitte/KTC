@@ -1147,7 +1147,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         def get_endstop_state(endstop_name):
             try:
                 endstop = None
-                toolhead = typing.cast('klippy_th.ToolHead', self._printer.lookup_object("toolhead"))
+                toolhead = typing.cast('klippy_th.ToolHead', self.printer.lookup_object("toolhead"))
                 
                 query_endstops = typing.cast('klippy_qe.QueryEndstops',
                                      self.printer.lookup_object("query_endstops"))
@@ -1157,7 +1157,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                         endstop = typing.cast('klippy_mcu.MCU_endstop', es)
                         break
                 if endstop is None:
-                    raise self._printer.command_error(f"Unknown endstop '{endstop_name}'")
+                    raise self.printer.command_error(f"Unknown endstop '{endstop_name}'")
 
                 last_move_time = toolhead.get_last_move_time()
                 is_triggered = bool(endstop.query_endstop(last_move_time))
