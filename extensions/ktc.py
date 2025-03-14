@@ -1139,32 +1139,57 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         - tuple(bool, str): (configuration_valide, message_erreur)
         """
         # Noms des endstops (ces noms doivent correspondre à vos définitions dans la configuration)
-        toolchanger_endstop = "manual_stepper tchead_endstop"
-        dock_endstops = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
+        toolchanger_endstop_name = "manual_stepper tchead_endstop"
+        dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
         
         # Fonction pour obtenir l'état d'un endstop
         def get_endstop_state(endstop_name):
             try:
-                # Extraire le nom du stepper manuel
-                stepper_parts = endstop_name.split()
-                if len(stepper_parts) >= 2:
-                    stepper_name = " ".join(stepper_parts[:2])
-                else:
-                    stepper_name = endstop_name
-                    
-                # Récupérer l'objet stepper et son état d'endstop
-                manual_stepper = self.printer.lookup_object(stepper_name)
-                endstop_state = manual_stepper.get_status(self.printer.get_reactor().monotonic())["endstop_state"]
+                # Dans Klipper, les manual_steppers exposent leur état d'endstop via la propriété 'endstop_state'
+                manual_stepper = self.printer.lookup_object(endstop_name)
                 
-                # True = endstop déclenché (détection)
-                return endstop_state
+                # Accès direct à la propriété endstop_state
+                if hasattr(manual_stepper, 'endstop_state'):
+                    # True si l'endstop est déclenché
+                    return manual_stepper.endstop_state
+                
+                # Si endstop_state n'est pas directement accessible, essayons via endstop
+                elif hasattr(manual_stepper, 'endstop') and hasattr(manual_stepper.endstop, 'query_endstop'):
+                    return manual_stepper.endstop.query_endstop(self.printer.get_reactor().monotonic())
+                    
+                # Dernière tentative - utiliser la commande QUERY_ENDSTOPS
+                else:
+                    self.log.always(f"Utilisation de QUERY_ENDSTOPS pour {endstop_name}")
+                    # Force l'exécution de QUERY_ENDSTOPS
+                    self.gcode.run_script_from_command("QUERY_ENDSTOPS")
+                    # Attend un court instant pour que la commande s'exécute
+                    import time
+                    time.sleep(0.1)
+                    # Récupère les résultats
+                    if hasattr(self.printer, 'query_endstops'):
+                        query_endstops = self.printer.lookup_object('query_endstops')
+                        if hasattr(query_endstops, 'last_query'):
+                            # La structure dépend de l'implémentation exacte
+                            return query_endstops.last_query.get(endstop_name, False)
+                    
+                    # Si rien n'a fonctionné, on suppose que l'endstop n'est pas déclenché
+                    self.log.always(f"Impossible de déterminer l'état de l'endstop {endstop_name}, supposé non déclenché")
+                    return False
+                    
             except Exception as e:
                 self.log.always(f"Erreur lors de la lecture de l'endstop {endstop_name}: {str(e)}")
+                import traceback
+                self.log.always(traceback.format_exc())
                 return None
         
         # Récupérer les états des endstops
-        tc_state = get_endstop_state(toolchanger_endstop)
-        dock_states = {dock: get_endstop_state(dock) for dock in dock_endstops}
+        tc_state = get_endstop_state(toolchanger_endstop_name)
+        dock_states = {dock: get_endstop_state(dock) for dock in dock_endstops_names}
+        
+        # Log des états pour le débogage
+        self.log.always(f"État du toolchanger ({toolchanger_endstop_name}): {tc_state}")
+        for dock, state in dock_states.items():
+            self.log.always(f"État du dock ({dock}): {state}")
         
         # Si un endstop n'a pas pu être lu, retourner une erreur
         if tc_state is None or None in dock_states.values():
@@ -1194,10 +1219,10 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         
         # Si nous arrivons ici, la configuration est valide
         if tools_off_dock == 0:
-            self.log.trace("ENDSTOPS OK: Tous les outils sont sur leurs docks et le toolchanger est vide")
+            self.log.always("ENDSTOPS OK: Tous les outils sont sur leurs docks et le toolchanger est vide")
         else:
             missing_docks = [dock for dock, state in dock_states.items() if state is False]
-            self.log.trace(f"ENDSTOPS OK: L'outil du dock {missing_docks[0]} est attaché au toolchanger")
+            self.log.always(f"ENDSTOPS OK: L'outil du dock {missing_docks[0]} est attaché au toolchanger")
         
         return True, "Configuration des endstops valide"
 
