@@ -1,4 +1,4 @@
-def check_tool_endstop_configuration(self):
+def check_tool_endstop_configuration(ktc_instance):
     """
     Vérifie la cohérence entre les états des endstops de toolchanger et des docks d'outils.
     

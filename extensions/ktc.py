@@ -156,8 +156,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.default_toolchanger,
             self.default_toolchanger.__class__.InitModeType.ON_START,
         )
-        self._register_tool_gcode_commands()
-        if check_tool_endstop_configuration():
+        self._register_tool_gcode_commands(self)
+        if check_tool_endstop_configuration(self):
             self.log.always("Endstop configuration is valid.") 
         else:
             self.log.always("Endstop configuration is invalid.")
