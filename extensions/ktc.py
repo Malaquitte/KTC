@@ -1217,10 +1217,10 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         axis_state = get_endstop_state(toolChanger_Axes_name)
         if tools_off_dock == 0 and axis_state is True:
             self.log.always("ERREUR ENDSTOPS: L'axe du toolchanger est en position de verrouillage sans outil selectionné")
-            raise self.printer.command_error("ERREUR ENDSTOPS: L'axe du toolchanger est en position de verrouillage sans outil selectionné")
+            #raise self.printer.command_error("ERREUR ENDSTOPS: L'axe du toolchanger est en position de verrouillage sans outil selectionné")
         elif axis_state is False:
             self.log.always("ERREUR ENDSTOPS: L'axe du toolchanger est en position de ouverte avec un outil selectionné")
-            raise self.printer.command_error("ERREUR ENDSTOPS: L'axe du toolchanger est en position de ouverte avec un outil selectionné")
+            #raise self.printer.command_error("ERREUR ENDSTOPS: L'axe du toolchanger est en position de ouverte avec un outil selectionné")
         return True, "Configuration des endstops valide"
 
 def load_config(config):
