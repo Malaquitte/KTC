@@ -158,11 +158,11 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         )
         self._register_tool_gcode_commands()
 
-#        valid, message = self.check_tool_endstop_configuration()
-#        if valid:
-#            self.log.always("Endstop configuration is valid.") 
-#        else:
-#            self.log.always(f"Endstop configuration is invalid: {message}")
+        valid, message = self.check_tool_endstop_configuration()
+        if valid:
+            self.log.always("Endstop configuration is valid.") 
+        else:
+            self.log.always(f"Endstop configuration is invalid: {message}")
 
     def _config_default_toolchanger(self):
         """Set the default toolchanger and validate it."""
