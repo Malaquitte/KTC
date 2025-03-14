@@ -1182,7 +1182,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         
         # Si un endstop n'a pas pu être lu, retourner une erreur
         if tc_state is None or None in dock_states.values():
-            return False, "Impossible de lire tous les états d'endstops"
+            raise self.printer.command_error("Impossible de lire tous les états d'endstops")
         
         # Compter combien d'outils sont absents de leurs docks
         tools_off_dock = sum(1 for state in dock_states.values() if state is False)
@@ -1192,19 +1192,19 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             # Cas 1: Tous les outils sont sur les docks mais le toolchanger indique qu'un outil est attaché
             error_msg = "Tous les outils sont sur leurs docks mais le toolchanger indique qu'un outil est attaché"
             self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
-            return False, error_msg
+            raise self.printer.command_error(error_msg)
             
         elif tc_state is True and tools_off_dock != 1:
             # Cas 2: Le toolchanger a un outil, mais le nombre d'outils absents n'est pas exactement 1
             error_msg = f"Le toolchanger a un outil, mais {tools_off_dock} outils sont absents de leurs docks (devrait être exactement 1)"
             self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
-            return False, error_msg
+            raise self.printer.command_error(error_msg)
             
         elif tc_state is False and tools_off_dock > 0:
             # Cas 3: Le toolchanger n'a pas d'outil, mais certains outils sont absents de leurs docks
             error_msg = f"Le toolchanger n'a pas d'outil, mais {tools_off_dock} outils sont absents de leurs docks"
             self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
-            return False, error_msg
+            raise self.printer.command_error(error_msg)
         
         # Si nous arrivons ici, la configuration est valide
         if tools_off_dock == 0:
