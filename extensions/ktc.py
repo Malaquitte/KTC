@@ -158,6 +158,10 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         )
         self._register_tool_gcode_commands()
 
+
+        self.log.debug("DEBUG:Retrieving endstop configuration.") 
+        self.log.always("ALWAYS:Retrieving endstop configuration.") 
+
         valid, message = self.check_tool_endstop_configuration()
         if valid:
             self.log.always("Endstop configuration is valid.") 
