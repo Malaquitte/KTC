@@ -27,6 +27,8 @@ if typing.TYPE_CHECKING:
     )
     from . import ktc_log, ktc_persisting, ktc_toolchanger, ktc_tool, ktc_heater
 
+from .ktc_context import check_tool_endstop_configuration
+
 # Constants for the restore_axis_on_toolchange variable.
 XYZ_TO_INDEX: dict[str, int] = {"x": 0, "X": 0, "y": 1, "Y": 1, "z": 2, "Z": 2}
 INDEX_TO_XYZ: dict[int, str] = {0: "X", 1: "Y", 2: "Z"}
@@ -155,6 +157,10 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.default_toolchanger.__class__.InitModeType.ON_START,
         )
         self._register_tool_gcode_commands()
+        if check_tool_endstop_configuration():
+            self.log.always("Endstop configuration is valid.") 
+        else:
+            self.log.always("Endstop configuration is invalid.")
 
     def _config_default_toolchanger(self):
         """Set the default toolchanger and validate it."""
