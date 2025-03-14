@@ -19,11 +19,12 @@ from .ktc_heater import HeaterStateType
 
 # Only import these modules in Dev environment. Consult Dev_doc.md for more info.
 if typing.TYPE_CHECKING:
-    from ...klipper.klippy import configfile, gcode
+    from ...klipper.klippy import configfile, gcode, mcu as klippy_mcu, toolhead as klippy_th
     from ...klipper.klippy.extras import (
         heaters as klippy_heaters,
         # gcode_move as klippy_gcode_move,
         fan_generic as klippy_fan_generic,
+        query_endstops as klippy_qe,
     )
     from . import ktc_log, ktc_persisting, ktc_toolchanger, ktc_tool, ktc_heater
 
@@ -1145,44 +1146,23 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         # Fonction pour obtenir l'état d'un endstop
         def get_endstop_state(endstop_name):
             try:
-                # Dans Klipper, les manual_steppers exposent leur état d'endstop via la propriété 'endstop_state'
-                manual_stepper = self.printer.lookup_object(endstop_name)
+                endstop = None
+                toolhead = typing.cast('klippy_th.ToolHead', self._printer.lookup_object("toolhead"))
                 
-                # Accès direct à la propriété endstop_state
-                if hasattr(manual_stepper, 'endstop_state'):
-                    # True si l'endstop est déclenché
-                    return manual_stepper.endstop_state
+                query_endstops = typing.cast('klippy_qe.QueryEndstops',
+                                     self.printer.lookup_object("query_endstops"))
                 
-                # Si endstop_state n'est pas directement accessible, essayons via endstop
-                elif hasattr(manual_stepper, 'endstop') and hasattr(manual_stepper.endstop, 'query_endstop'):
-                    return manual_stepper.endstop.query_endstop(self.printer.get_reactor().monotonic())
-                    
-                # Dernière tentative - utiliser la commande QUERY_ENDSTOPS
-                else:
-                    self.log.always(f"Utilisation de QUERY_ENDSTOPS pour {endstop_name}")
-                    # Force l'exécution de QUERY_ENDSTOPS
-                    self.gcode.run_script_from_command("QUERY_ENDSTOPS")
-                    # Attend un court instant pour que la commande s'exécute
-                    import time
-                    time.sleep(0.1)
-                    # Récupère les résultats
-                    if hasattr(self.printer, 'query_endstops'):
-                        query_endstops = self.printer.lookup_object('query_endstops')
-                        self.log.always("query_endstops trouvé")
-                        if hasattr(query_endstops, 'last_query'):
-                            # La structure dépend de l'implémentation exacte
-                            return query_endstops.last_query.get(endstop_name, False)
-                    
-                    # Si rien n'a fonctionné, on suppose que l'endstop n'est pas déclenché
-                    self.log.always(f"Impossible de déterminer l'état de l'endstop {endstop_name}, supposé non déclenché")
-                    # Dernière tentative
-                    self.log.always("Retrieving endstops")
-                    endstops = self.printer.query_endstops()
-                    self.log.always("Displaying endstops state")
-                    for name, state in endstops.items():
-                        self.log.always(f"Endstop {name}: {state}")
-                    return False
-                    
+                for es, name in query_endstops.endstops:
+                    if name == endstop_name:
+                        endstop = typing.cast('klippy_mcu.MCU_endstop', es)
+                        break
+                if endstop is None:
+                    raise self._printer.command_error(f"Unknown endstop '{endstop_name}'")
+
+                last_move_time = toolhead.get_last_move_time()
+                is_triggered = bool(endstop.query_endstop(last_move_time))
+                return is_triggered
+
             except Exception as e:
                 self.log.always(f"Erreur lors de la lecture de l'endstop {endstop_name}: {str(e)}")
                 import traceback
@@ -1190,7 +1170,9 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 return None
         
         # Récupérer les états des endstops
+        self.log.always("retrieving endstop state from toolchanger")
         tc_state = get_endstop_state(toolchanger_endstop_name)
+        self.log.always("retrieving endstop state from tool rack")
         dock_states = {dock: get_endstop_state(dock) for dock in dock_endstops_names}
         
         # Log des états pour le débogage
