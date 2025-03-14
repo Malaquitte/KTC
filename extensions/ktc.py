@@ -1142,6 +1142,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         # Noms des endstops (ces noms doivent correspondre à vos définitions dans la configuration)
         toolchanger_endstop_name = "manual_stepper tchead_endstop"
         dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
+        toolChanger_Axes_name = "manual_stepper tool_lock"
         
         # Fonction pour obtenir l'état d'un endstop
         def get_endstop_state(endstop_name):
@@ -1213,6 +1214,13 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             missing_docks = [dock for dock, state in dock_states.items() if state is False]
             self.log.always(f"ENDSTOPS OK: L'outil du dock {missing_docks[0]} est attaché au toolchanger")
         
+        axis_state = get_endstop_state(toolChanger_Axes_name)
+        if tools_off_dock == 0 and axis_state is True:
+            self.log.always("ERREUR ENDSTOPS: L'axe du toolchanger est en position de verrouillage sans outil selectionné")
+            raise self.printer.command_error("ERREUR ENDSTOPS: L'axe du toolchanger est en position de verrouillage sans outil selectionné")
+        elif axis_state is False:
+            self.log.always("ERREUR ENDSTOPS: L'axe du toolchanger est en position de ouverte avec un outil selectionné")
+            raise self.printer.command_error("ERREUR ENDSTOPS: L'axe du toolchanger est en position de ouverte avec un outil selectionné")
         return True, "Configuration des endstops valide"
 
 def load_config(config):
