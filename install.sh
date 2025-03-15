@@ -235,19 +235,29 @@ install_klipper_config() {
     else
         log_error "ktc directory already exists in ${KLIPPER_CONFIG_HOME} - skipping creating it"
     fi
-
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/config" ]; then
+        log_info "Creating the ${KLIPPER_CONFIG_HOME}/ktc/config directory"
+        mkdir ${KLIPPER_CONFIG_HOME}/ktc/config
+    else
+        log_error "ktc/config directory already exists in ${KLIPPER_CONFIG_HOME}/ktc/config - skipping creating it"
+    fi
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/base" ]; then
         log_info "Copying base macros to ${KLIPPER_CONFIG_HOME}/ktc"
         cp -r ${REPO_DIR}/macros/base ${KLIPPER_CONFIG_HOME}/ktc
     else
         log_error "Base macros already exists in ${KLIPPER_CONFIG_HOME}/ktc/base - skipping copying it there"
     fi
-
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability" ]; then
         log_info "Copying optional_rrf_compability macros to ${KLIPPER_CONFIG_HOME}/ktc"
         cp -r ${REPO_DIR}/macros/optional_rrf_compability ${KLIPPER_CONFIG_HOME}/ktc
     else
         log_error "Optional RRF compability macros already exists in ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability - skipping copying it there"
+    fi
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/config" ]; then
+        log_info "Copying config macros to ${KLIPPER_CONFIG_HOME}/ktc/config"
+        cp -r ${REPO_DIR}/config/toolchanger.cfg ${KLIPPER_CONFIG_HOME}/ktc/config
+    else
+        log_error "Optional toolchanger.cfg already exists in ${KLIPPER_CONFIG_HOME}/ktc/config - skipping copying it there"
     fi
     # Restart Klipper
     restart_klipper
