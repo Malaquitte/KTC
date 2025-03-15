@@ -41,9 +41,11 @@ Configure away inside printer.cfg or a file referenced by it.
 ### 2\. Manual Install
 Copy or link the python (`*.py`) files into the `\klipper\klippy\extras` directory.
 
-Copy the macros inside the macros folder and reference them in printer.cfg.
+Copy base, config, macros and optional_rrf_compatibility folders inside ktc folder and reference them in printer.cfg as below.
 
 ```
-[include ktc/config/toolchanger.cfg]
-[include ktc/macros/tool_macros.cfg]
+[include ktc/base/*.cfg]
+[include ktc/config/*.cfg]
+[include ktc/macros/*.cfg]
+[include ktc/optional_rrf_compatibility/*.cfg]
 ```
