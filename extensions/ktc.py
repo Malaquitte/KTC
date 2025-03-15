@@ -1129,22 +1129,20 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
 
     def check_tool_endstop_configuration(self):
         """
-        Vérifie la cohérence entre les états des endstops de toolchanger et des docks d'outils.
+        Checks consistency between the states of toolchanger endstops and tool docks.
         
-        Cette fonction vérifie que:
-        1. Si un outil est détecté sur le toolchanger, exactement un outil doit être absent du rack
-        2. Si aucun outil n'est détecté sur le toolchanger, tous les outils doivent être présents sur le rack
-        3. Si tous les outils sont sur le rack, aucun outil ne doit être détecté sur le toolchanger
+        This function checks that:
+        1. If a tool is detected on the toolchanger, exactly one tool must be absent from the rack.
+        2. If no tool is detected on the toolchanger, all tools must be present on the rack
+        3. If all tools are on the rack, no tools should be detected on the toolchanger.
         
-        Retourne:
-        - tuple(bool, str): (configuration_valide, message_erreur)
         """
-        # Noms des endstops (ces noms doivent correspondre à vos définitions dans la configuration)
+        # Endstop names (these must correspond to your configuration definitions)
         toolchanger_endstop_name = "manual_stepper tchead_endstop"
         dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
         toolChanger_Axes_name = "manual_stepper tool_lock"
         
-        # Fonction pour obtenir l'état d'un endstop
+        # tion to obtain the state of an endstop
         def get_endstop_state(endstop_name):
             try:
                 endstop = None
@@ -1165,65 +1163,161 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 return is_triggered
 
             except Exception as e:
-                self.log.always(f"Erreur lors de la lecture de l'endstop {endstop_name}: {str(e)}")
+                self.log.always(f"Endstop reading error {endstop_name}: {str(e)}")
                 import traceback
                 self.log.always(traceback.format_exc())
                 return None
         
-        # Récupérer les états des endstops
+        # Recovering endstop status
         self.log.always("retrieving endstop state from toolchanger")
         tc_state = get_endstop_state(toolchanger_endstop_name)
         self.log.always("retrieving endstop state from tool rack")
         dock_states = {dock: get_endstop_state(dock) for dock in dock_endstops_names}
         
-        # Log des états pour le débogage
-        self.log.always(f"État du toolchanger ({toolchanger_endstop_name}): {tc_state}")
+        # Status log for debugging
+        self.log.always(f"Toolchanger status ({toolchanger_endstop_name}): {tc_state}")
         for dock, state in dock_states.items():
-            self.log.always(f"État du dock ({dock}): {state}")
+            self.log.always(f"Dock status ({dock}): {state}")
         
-        # Si un endstop n'a pas pu être lu, retourner une erreur
+        # If an endstop could not be read, return an error
         if tc_state is None or None in dock_states.values():
-            raise self.printer.command_error("Impossible de lire tous les états d'endstops")
+            raise self.printer.command_error("Enable to read all endstops states")
         
-        # Compter combien d'outils sont absents de leurs docks
+        # Count how many tools are missing from their doc
         tools_off_dock = sum(1 for state in dock_states.values() if state is False)
         
-        # Analyser la configuration
+        # Analyze configuration
         if all(dock_states.values()) and tc_state is True:
-            # Cas 1: Tous les outils sont sur les docks mais le toolchanger indique qu'un outil est attaché
-            error_msg = "Tous les outils sont sur leurs docks mais le toolchanger indique qu'un outil est attaché"
-            self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
+            # Case 1: All tools are on the docks, but the toolchanger indicates that a tool is attached.
+            error_msg = "All tools are on their docks, but the toolchanger indicates that a tool is attached."
+            self.log.always(f"ENDSTOPS ERROR: {error_msg}")
             raise self.printer.command_error(error_msg)
             
         elif tc_state is True and tools_off_dock != 1:
-            # Cas 2: Le toolchanger a un outil, mais le nombre d'outils absents n'est pas exactement 1
-            error_msg = f"Le toolchanger a un outil, mais {tools_off_dock} outils sont absents de leurs docks (devrait être exactement 1)"
-            self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
+            # Case 2: The toolchanger has one tool, but the number of missing tools is not exactly 1.
+            error_msg = f"The toolchanger has a tool, but {tools_off_dock} tools are missing from their docks (should be exactly 1)."
+            self.log.always(f"ENDSTOPS ERROR: {error_msg}")
             raise self.printer.command_error(error_msg)
             
         elif tc_state is False and tools_off_dock > 0:
-            # Cas 3: Le toolchanger n'a pas d'outil, mais certains outils sont absents de leurs docks
-            error_msg = f"Le toolchanger n'a pas d'outil, mais {tools_off_dock} outils sont absents de leurs docks"
-            self.log.always(f"ERREUR ENDSTOPS: {error_msg}")
+            # Case 3: The toolchanger has no tools, but some tools are missing from their docks
+            error_msg = f"The toolchanger has no tools, but {tools_off_dock} tools are absent from their docks"
+            self.log.always(f"ENDSTOPS ERROR: {error_msg}")
             raise self.printer.command_error(error_msg)
         
-        # Si nous arrivons ici, la configuration est valide
+        # If we arrive here, the configuration is valid !
         if tools_off_dock == 0:
-            self.log.always("ENDSTOPS OK: Tous les outils sont sur leurs docks et le toolchanger est vide")
+            self.log.always("ENDSTOPS OK: All tools are on their docks and the toolchanger is empty.")
         else:
             missing_docks = [dock for dock, state in dock_states.items() if state is False]
-            self.log.always(f"ENDSTOPS OK: L'outil du dock {missing_docks[0]} est attaché au toolchanger")
+            self.log.always(f"ENDSTOPS OK: The {missing_docks[0]} dock tool is attached to the toolchanger")
         
         axis_state = get_endstop_state(toolChanger_Axes_name)
         if tools_off_dock == 0 and axis_state is True:
-            self.log.always("ERREUR ENDSTOPS: L'axe du toolchanger est en position de verrouillage sans outil selectionné")
-            raise self.printer.command_error("ERREUR ENDSTOPS: L'axe du toolchanger est en position de verrouillage sans outil selectionné")
+            self.log.always("ENDSTOPS ERROR: Toolchanger shaft in locking position without tool selected")
+            raise self.printer.command_error("ENDSTOPS ERROR: Toolchanger shaft in locking position without tool selected")
         
         if tools_off_dock != 0 and axis_state is False:
-            self.log.always("ERREUR ENDSTOPS: L'axe du toolchanger est en position ouverte avec un outil selectionné")
-            raise self.printer.command_error("ERREUR ENDSTOPS: L'axe du toolchanger est en position de ouverte avec un outil selectionné")
+            self.log.always("ENDSTOPS ERROR: Toolchanger axis is in open position with tool selected")
+            raise self.printer.command_error("ENDSTOPS ERROR: Toolchanger axis is in open position with tool selected")
 
-        return True, "Configuration des endstops valide"
+        return True, "Valid endstops configuration"
+
+    def initialize_tool_lock_shaft(self, gcmd=None):
+        """
+        Initialize the tool lock shaft by:
+        1. Slowly rotating until endstop is triggered (max 180 steps)
+        2. Moving back by 70 steps once endstop is triggered
+        
+        This method ensures the shaft is in a known position.
+        Raises an error if endstop is not triggered within 180 steps.
+        """
+        self.log.always("Initializing tool lock shaft...")
+        
+        # Get the manual stepper object
+        try:
+            tool_lock_stepper = self.printer.lookup_object("manual_stepper tool_lock")
+            toolhead = self.printer.lookup_object("toolhead")
+            query_endstops = self.printer.lookup_object("query_endstops")
+        except Exception as e:
+            msg = f"Cannot find required objects: {str(e)}"
+            if gcmd:
+                raise gcmd.error(msg)
+            else:
+                self.log.always(msg)
+                return False
+        
+        # Find the endstop
+        endstop = None
+        for es, name in query_endstops.endstops:
+            if name == "manual_stepper tool_lock_endstop":
+                endstop = es
+                break
+        
+        if endstop is None:
+            msg = "Cannot find tool_lock_endstop"
+            if gcmd:
+                raise gcmd.error(msg)
+            else:
+                self.log.always(msg)
+                return False
+        
+        # Set low speed for homing
+        homing_speed = 50  # Adjust this value as needed (steps/sec)
+        
+        # Save current velocity for later restoration
+        original_velocity = tool_lock_stepper.velocity
+        
+        # 1. Move slowly until endstop is triggered
+        tool_lock_stepper.do_set_position(0)
+        tool_lock_stepper.do_set_velocity(homing_speed)
+        
+        # Try to move up to 180 steps, checking endstop state after each small movement
+        step_increment = 10
+        total_steps = 0
+        
+        while total_steps < 180:
+            # Move a small amount
+            tool_lock_stepper.do_move(step_increment, False)
+            total_steps += step_increment
+            
+            # Check if endstop is triggered
+            last_move_time = toolhead.get_last_move_time()
+            if endstop.query_endstop(last_move_time):
+                self.log.always(f"Endstop triggered after {total_steps} steps")
+                break
+            
+            # Allow a small delay for endstop to settle
+            self.printer.get_reactor().pause(toolhead.get_last_move_time() + 0.1)
+        
+        # Check if we exceeded the maximum steps without triggering
+        if total_steps >= 180:
+            msg = "Error: Tool lock shaft failed to trigger endstop within 180 steps"
+            self.log.always(msg)
+            tool_lock_stepper.do_set_velocity(original_velocity)
+            if gcmd:
+                raise gcmd.error(msg)
+            else:
+                raise self.printer.command_error(msg)
+        
+        # 2. After endstop is triggered, move back by 70 steps
+        tool_lock_stepper.do_set_velocity(homing_speed / 2)  # Move back even slower
+        tool_lock_stepper.do_move(-70, False)  # Move 70 steps in negative direction
+        
+        # Set position to 0 at the final position
+        tool_lock_stepper.do_set_position(0)
+        
+        # Restore original velocity
+        tool_lock_stepper.do_set_velocity(original_velocity)
+        
+        self.log.always("Tool lock shaft initialization complete")
+        return True
+
+    # Register the g-code command for manual initialization
+    cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT_help = "Initialize the tool lock shaft by homing to endstop and backing off 70 steps"
+
+    def cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT(self, gcmd):
+        self.initialize_tool_lock_shaft(gcmd)
 
 def load_config(config):
     # prof = cProfile.Profile()
