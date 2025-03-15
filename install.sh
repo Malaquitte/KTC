@@ -204,38 +204,55 @@ install_klipper_config() {
         # Add the configuration to printer.cfg
         # This example assumes that that both the server and the webcam stream are running on the same machine as Klipper
         # The ktc section is not needed if a tool is configured but loaded here for the macros to work if no tool is configured
-        already_included=$(grep -c "\[ktc\]" ${dest} || true)
+        #already_included=$(grep -c "\[ktc\]" ${dest} || true)
+        #if [ "${already_included}" -eq 0 ]; then
+        #    echo "" >> "${dest}"    # Add a blank line
+        #    echo "" >> "${dest}"    # Add a blank line
+        #    echo -e "[ktc]" >> "${dest}"    # Add the section header
+
+        #    log_info "Added KTC configuration to printer.cfg"
+        #    log_important "Please check the configuration in printer.cfg and adjust it as needed"
+        #else
+        #    log_error "[ktc] already exists in printer.cfg - skipping adding it there"
+        #fi
+        
+        # Add the inclusion of ktc/base to printer.cfg if it doesn't exist
+        already_included=$(grep -c "\[include ktc/base/*.cfg\]" ${dest} || true)
         if [ "${already_included}" -eq 0 ]; then
             echo "" >> "${dest}"    # Add a blank line
-            echo "" >> "${dest}"    # Add a blank line
-            echo -e "[ktc]" >> "${dest}"    # Add the section header
-
-            log_info "Added KTC configuration to printer.cfg"
-            log_important "Please check the configuration in printer.cfg and adjust it as needed"
+            echo -e "[include ktc/base/*.cfg]" >> "${dest}"    # Add the section header
         else
-            log_error "[ktc] already exists in printer.cfg - skipping adding it there"
+            log_error "[include ktc/base/*.cfg] already exists in printer.cfg - skipping adding it"
         fi
-
+        
         # Add the inclusion of config to printer.cfg if it doesn't exist
         already_included=$(grep -c "\[include ktc/config/*.cfg\]" ${dest} || true)
         if [ "${already_included}" -eq 0 ]; then
-            echo "" >> "${dest}"    # Add a blank line
             echo -e "[include ktc/config/*.cfg]" >> "${dest}"    # Add the section header
         else
-            log_error "[include ktc/config/*.cfg] already exists in printer.cfg - skipping adding it and the optional config there"
+            log_error "[include ktc/config/*.cfg] already exists in printer.cfg - skipping adding it"
         fi
+        
         # Add the inclusion of macros to printer.cfg if it doesn't exist
         already_included=$(grep -c "\[include ktc/macros/*.cfg\]" ${dest} || true)
         if [ "${already_included}" -eq 0 ]; then
-            echo "" >> "${dest}"    # Add a blank line
             echo -e "[include ktc/macros/*.cfg]" >> "${dest}"    # Add the section header
         else
-            log_error "[include ktc/macros/*.cfg] already exists in printer.cfg - skipping adding it and the optional macros there"
+            log_error "[include ktc/macros/*.cfg] already exists in printer.cfg - skipping adding it"
+        fi
+         
+        # Add the inclusion of optional_rrf_compability to printer.cfg if it doesn't exist
+        already_included=$(grep -c "\[include ktc/optional_rrf_compability/*.cfg\]" ${dest} || true)
+        if [ "${already_included}" -eq 0 ]; then
+            echo -e "[include ktc/optional_rrf_compability/*.cfg]" >> "${dest}"    # Add the section header
+        else
+            log_error "[include ktc/optional_rrf_compability/*.cfg] already exists in printer.cfg - skipping adding it"
         fi
     else
         log_error "File printer.cfg file not found! Cannot add KTC configuration. Do it manually."
     fi
 
+    # Create folders
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc" ]; then
         log_info "Creating the ${KLIPPER_CONFIG_HOME}/ktc directory"
         mkdir ${KLIPPER_CONFIG_HOME}/ktc
@@ -267,23 +284,30 @@ install_klipper_config() {
         log_error "ktc/optional_rrf_compability directory already exists in ${KLIPPER_CONFIG_HOME}/ktc - skipping creating it"
     fi
     
+    #Copy config files in folders 
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/base" ]; then
+        log_info "Copying config files to ${KLIPPER_CONFIG_HOME}/ktc/base"
+        cp -r ${REPO_DIR}/config_files/base ${KLIPPER_CONFIG_HOME}/ktc/base
+    else
+        log_error "Config files already exists in ${KLIPPER_CONFIG_HOME}/ktc/base - skipping copying it there"
+    fi
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/config" ]; then
         log_info "Copying config files to ${KLIPPER_CONFIG_HOME}/ktc/config"
-        cp -r ${REPO_DIR}/config ${KLIPPER_CONFIG_HOME}/ktc/config
+        cp -r ${REPO_DIR}/config_files/config ${KLIPPER_CONFIG_HOME}/ktc/config
     else
         log_error "Config files already exists in ${KLIPPER_CONFIG_HOME}/ktc/config - skipping copying it there"
     fi
-    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability" ]; then
-        log_info "Copying optional_rrf_compability macros to ${KLIPPER_CONFIG_HOME}/ktc"
-        cp -r ${REPO_DIR}/optional_rrf_compability ${KLIPPER_CONFIG_HOME}/ktc
-    else
-        log_error "Optional RRF compability macros already exists in ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability - skipping copying it there"
-    fi
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/macros" ]; then
-        log_info "Copying macros to ${KLIPPER_CONFIG_HOME}/ktc/macros"
-        cp -r ${REPO_DIR}/macros ${KLIPPER_CONFIG_HOME}/ktc
+        log_info "Copying macros files to ${KLIPPER_CONFIG_HOME}/ktc/macros"
+        cp -r ${REPO_DIR}/config_files/macros ${KLIPPER_CONFIG_HOME}/ktc/macros
     else
         log_error "Macro files already exists in ${KLIPPER_CONFIG_HOME}/ktc/macros - skipping copying it there"
+    fi
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability" ]; then
+        log_info "Copying optional_rrf_compability files to ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compatibility"
+        cp -r ${REPO_DIR}/config_files/optional_rrf_compability ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compatibility
+    else
+        log_error "Optional RRF compability files already exists in ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability - skipping copying it there"
     fi
     # Restart Klipper
     restart_klipper
