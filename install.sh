@@ -242,21 +242,34 @@ install_klipper_config() {
     else
         log_error "ktc directory already exists in ${KLIPPER_CONFIG_HOME} - skipping creating it"
     fi
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/base" ]; then
+        log_info "Creating the ${KLIPPER_CONFIG_HOME}/ktc/base directory"
+        mkdir ${KLIPPER_CONFIG_HOME}/ktc/base
+    else
+        log_error "ktc/base directory already exists in ${KLIPPER_CONFIG_HOME}/ktc - skipping creating it"
+    fi
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/config" ]; then
         log_info "Creating the ${KLIPPER_CONFIG_HOME}/ktc/config directory"
         mkdir ${KLIPPER_CONFIG_HOME}/ktc/config
     else
-        log_error "ktc/config directory already exists in ${KLIPPER_CONFIG_HOME}/ktc/config - skipping creating it"
+        log_error "ktc/config directory already exists in ${KLIPPER_CONFIG_HOME}/ktc - skipping creating it"
     fi
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/macros" ]; then
         log_info "Creating the ${KLIPPER_CONFIG_HOME}/ktc/macros directory"
         mkdir ${KLIPPER_CONFIG_HOME}/ktc/macros
     else
-        log_error "ktc/macros directory already exists in ${KLIPPER_CONFIG_HOME}/ktc/macros - skipping creating it"
+        log_error "ktc/macros directory already exists in ${KLIPPER_CONFIG_HOME}/ktc - skipping creating it"
     fi
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability" ]; then
+        log_info "Creating the ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability directory"
+        mkdir ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability
+    else
+        log_error "ktc/optional_rrf_compability directory already exists in ${KLIPPER_CONFIG_HOME}/ktc - skipping creating it"
+    fi
+    
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/config" ]; then
         log_info "Copying config files to ${KLIPPER_CONFIG_HOME}/ktc/config"
-        cp -r ${REPO_DIR}/config ${KLIPPER_CONFIG_HOME}/ktc
+        cp -r ${REPO_DIR}/config ${KLIPPER_CONFIG_HOME}/ktc/config
     else
         log_error "Config files already exists in ${KLIPPER_CONFIG_HOME}/ktc/config - skipping copying it there"
     fi
