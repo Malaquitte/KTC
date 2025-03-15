@@ -216,14 +216,21 @@ install_klipper_config() {
             log_error "[ktc] already exists in printer.cfg - skipping adding it there"
         fi
 
-        # Add the inclusion of macros to printer.cfg if it doesn't exist
-        already_included=$(grep -c "\[include ktc/base/*.cfg\]" ${dest} || true)
+        # Add the inclusion of config to printer.cfg if it doesn't exist
+        already_included=$(grep -c "\[include ktc/config/*.cfg\]" ${dest} || true)
         if [ "${already_included}" -eq 0 ]; then
             echo "" >> "${dest}"    # Add a blank line
-            echo -e "[include ktc/base/*.cfg]" >> "${dest}"    # Add the section header
-            echo -e "[include ktc/optional_rrf_compability/*.cfg]" >> "${dest}"    # Add the section header
+            echo -e "[include ktc/config/*.cfg]" >> "${dest}"    # Add the section header
         else
-            log_error "[include ktc/base/*.cfg] already exists in printer.cfg - skipping adding it and the optional macros there"
+            log_error "[include ktc/config/*.cfg] already exists in printer.cfg - skipping adding it and the optional config there"
+        fi
+        # Add the inclusion of macros to printer.cfg if it doesn't exist
+        already_included=$(grep -c "\[include ktc/macros/*.cfg\]" ${dest} || true)
+        if [ "${already_included}" -eq 0 ]; then
+            echo "" >> "${dest}"    # Add a blank line
+            echo -e "[include ktc/macros/*.cfg]" >> "${dest}"    # Add the section header
+        else
+            log_error "[include ktc/macros/*.cfg] already exists in printer.cfg - skipping adding it and the optional macros there"
         fi
     else
         log_error "File printer.cfg file not found! Cannot add KTC configuration. Do it manually."
@@ -241,23 +248,29 @@ install_klipper_config() {
     else
         log_error "ktc/config directory already exists in ${KLIPPER_CONFIG_HOME}/ktc/config - skipping creating it"
     fi
-    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/base" ]; then
-        log_info "Copying base macros to ${KLIPPER_CONFIG_HOME}/ktc"
-        cp -r ${REPO_DIR}/macros/base ${KLIPPER_CONFIG_HOME}/ktc
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/macros" ]; then
+        log_info "Creating the ${KLIPPER_CONFIG_HOME}/ktc/macros directory"
+        mkdir ${KLIPPER_CONFIG_HOME}/ktc/macros
     else
-        log_error "Base macros already exists in ${KLIPPER_CONFIG_HOME}/ktc/base - skipping copying it there"
+        log_error "ktc/macros directory already exists in ${KLIPPER_CONFIG_HOME}/ktc/macros - skipping creating it"
+    fi
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/config" ]; then
+        log_info "Copying config files to ${KLIPPER_CONFIG_HOME}/ktc/config"
+        cp -r ${REPO_DIR}/config ${KLIPPER_CONFIG_HOME}/ktc
+    else
+        log_error "Config files already exists in ${KLIPPER_CONFIG_HOME}/ktc/config - skipping copying it there"
     fi
     if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability" ]; then
         log_info "Copying optional_rrf_compability macros to ${KLIPPER_CONFIG_HOME}/ktc"
-        cp -r ${REPO_DIR}/macros/optional_rrf_compability ${KLIPPER_CONFIG_HOME}/ktc
+        cp -r ${REPO_DIR}/optional_rrf_compability ${KLIPPER_CONFIG_HOME}/ktc
     else
         log_error "Optional RRF compability macros already exists in ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability - skipping copying it there"
     fi
-    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/config" ]; then
-        log_info "Copying config macros to ${KLIPPER_CONFIG_HOME}/ktc/config"
-        cp -r ${REPO_DIR}/config/toolchanger.cfg ${KLIPPER_CONFIG_HOME}/ktc/config
+    if [ ! -d "${KLIPPER_CONFIG_HOME}/ktc/macros" ]; then
+        log_info "Copying macros to ${KLIPPER_CONFIG_HOME}/ktc/macros"
+        cp -r ${REPO_DIR}/macros ${KLIPPER_CONFIG_HOME}/ktc
     else
-        log_error "Optional toolchanger.cfg already exists in ${KLIPPER_CONFIG_HOME}/ktc/config - skipping copying it there"
+        log_error "Macro files already exists in ${KLIPPER_CONFIG_HOME}/ktc/macros - skipping copying it there"
     fi
     # Restart Klipper
     restart_klipper
