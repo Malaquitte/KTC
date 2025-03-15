@@ -24,7 +24,7 @@ Universal Toolchanger helper for Klipper
   </a>
 </p>
 
-This is a fork of [KTC V2](https://github.com/TypQxQ/KTC).
+This is a fork of [KTC V2](https://github.com/TypQxQ/KTC). This version takes into account multiple endstop states to determine the proper functioning of the toolchanger.
 
 ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Installation
 
