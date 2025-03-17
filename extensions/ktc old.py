@@ -1234,102 +1234,66 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         """
         self.log.always("Initializing tool lock shaft...")
         
-        # Check for tool already engaged in toolchanger
-        toolchanger_endstop_name = "manual_stepper tchead_endstop"
-        dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
-        
-        # Function to check endstop state
-        def get_endstop_state(endstop_name):
+        #Check if all swiches are correctly triggered, then command can be executed
+        if self.check_tool_endstop_configuration():
             try:
-                endstop = None
-                toolhead = typing.cast('klippy_th.ToolHead', self.printer.lookup_object("toolhead"))
-                query_endstops = typing.cast('klippy_qe.QueryEndstops', self.printer.lookup_object("query_endstops"))
+                # Get the necessary objects
+                tool_lock_stepper = self.printer.lookup_object("manual_stepper tool_lock")
+                query_endstop_continuesly = self.printer.lookup_object("query_endstop_continuesly")
                 
-                for es, name in query_endstops.endstops:
-                    if name == endstop_name:
-                        endstop = typing.cast('klippy_mcu.MCU_endstop', es)
-                        break
-                if endstop is None:
-                    raise self.printer.command_error(f"Unknown endstop '{endstop_name}'")
+                # Set homing speed and acceleration
+                homing_speed = 50  # Steps per second 
+                homing_accel = 100  # Steps per second squared
+                
+                # Display current position before homing
+                current_position = tool_lock_stepper.get_position()[0]
+                self.log.always(f"Home Endstop position: {current_position} steps")
 
-                last_move_time = toolhead.get_last_move_time()
-                is_triggered = bool(endstop.query_endstop(last_move_time))
-                return is_triggered
-            except Exception as e:
-                self.log.always(f"Endstop reading error {endstop_name}: {str(e)}")
-                import traceback
-                self.log.always(traceback.format_exc())
-                return None
-        
-        # Check toolchanger state
-        tc_state = get_endstop_state(toolchanger_endstop_name)
-        dock_states = {dock: get_endstop_state(dock) for dock in dock_endstops_names}
-        tools_off_dock = sum(1 for state in dock_states.values() if state is False)
-        
-        # Check if a tool is engaged in the toolchanger
-        if tc_state is True and tools_off_dock == 1:
-            msg = "Cannot initialize tool lock shaft: A tool is currently engaged in the toolchanger"
-            self.log.always(msg)
-            if gcmd:
-                gcmd.respond_info(msg)
-            return False
-        
-        # Proceed with initialization if no tool is engaged
-        try:
-            # Get the necessary objects
-            tool_lock_stepper = self.printer.lookup_object("manual_stepper tool_lock")
-            query_endstop_continuesly = self.printer.lookup_object("query_endstop_continuesly")
-            
-            # Set homing speed and acceleration
-            homing_speed = 50  # Steps per second 
-            homing_accel = 100  # Steps per second squared
-            
-            # Display current position before homing
-            current_position = tool_lock_stepper.get_position()[0]
-            self.log.always(f"Home Endstop position: {current_position} steps")
-
-            # First check if endstop is already triggered
-            query_endstop_continuesly.query_endstop("manual_stepper tool_lock", True, 1)
-            if query_endstop_continuesly.last_endstop_query.get("manual_stepper tool_lock", False):
-                self.log.always("Endstop already triggered, moving away first")
-                # Move away with actual manual stepper command
+                # First check if endstop is already triggered
+                ## Il faut que j'y revienne !! car s'il y a déjà un tool sur le tc il ne faut rien faire
+                ## sinon si le endstop est triggered sans aucun tool sur le tc et tout les tools sur le dock 
+                ## il faut faire la proc d'initialization
+                query_endstop_continuesly.query_endstop("manual_stepper tool_lock", True, 1)
+                if query_endstop_continuesly.last_endstop_query.get("manual_stepper tool_lock", False):
+                    self.log.always("Endstop already triggered, moving away first")
+                    # Move away with actual manual stepper command
+                    self.gcode.run_script_from_command(
+                        f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
+                        f"ACCEL={homing_accel} MOVE=-20"
+                    )
+                
+                # Move to endstop using homing move
+                self.log.always("Moving to endstop...")
                 self.gcode.run_script_from_command(
                     f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                    f"ACCEL={homing_accel} MOVE=-20"
+                    f"ACCEL={homing_accel} MOVE=180 STOP_ON_ENDSTOP=1"
                 )
-            
-            # Move to endstop using homing move
-            self.log.always("Moving to endstop...")
-            self.gcode.run_script_from_command(
-                f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                f"ACCEL={homing_accel} MOVE=180 STOP_ON_ENDSTOP=1"
-            )
-            
-            # set position to 0
-            tool_lock_stepper.do_set_position(0)
-                        
-            # Get current position after homing
-            current_position = tool_lock_stepper.get_position()[0]  # Get position value
-            self.log.always(f"Endstop triggered at position: {current_position} steps")
+                
+                # set position to 0
+                tool_lock_stepper.do_set_position(0)
+                              
+                # Get current position after homing
+                current_position = tool_lock_stepper.get_position()[0]  # Get position value
+                self.log.always(f"Endstop triggered at position: {current_position} steps")
 
-            # Now move back by 115 steps
-            self.log.always("Moving back -115 steps from endstop position")
-            self.gcode.run_script_from_command(
-                f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                f"ACCEL={homing_accel} MOVE=-115"
-            )
-            
-            self.log.always("Tool lock shaft initialization complete")
-            return True
-            
-        except Exception as e:
-            msg = f"Tool lock initialization failed: {str(e)}"
-            self.log.always(msg)
-            if gcmd:
-                raise gcmd.error(msg)
-            else:
-                raise self.printer.command_error(msg)
-            return False
+                # Now move back by 115 steps
+                self.log.always("Moving back -115 steps from endstop position")
+                self.gcode.run_script_from_command(
+                    f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
+                    f"ACCEL={homing_accel} MOVE=-115"
+                )
+                
+                self.log.always("Tool lock shaft initialization complete")
+                return True
+                
+            except Exception as e:
+                msg = f"Tool lock initialization failed: {str(e)}"
+                self.log.always(msg)
+                if gcmd:
+                    raise gcmd.error(msg)
+                else:
+                    raise self.printer.command_error(msg)
+                return False
 
     cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT_help = "Initialize the tool lock shaft by homing to endstop and backing off"
 
