@@ -36,6 +36,7 @@
   | `KTC_TOOLCHANGER_INITIALIZE [TOOLCHANGER=<value>]` | Manually initialize the specified or default toolchanger. |
   | `KTC_HEATERS_PAUSE` | Turns off all heaters that are configured for tools and saves the changes. The heaters can be resumed later using the command KTC_HEATERS_RESUME. This command does not affect heated beds. |
   | `KTC_HEATERS_RESUME` | Resumes all heaters that were previously turned off by the `KTC_HEATERS_PAUSE` command. |
+  | `KTC_INITIALIZE_TOOL_LOCK_SHAFT` | Initialize the tool lock shaft by homing to endstop and backing off in horizontal position. |
   <br>
 
   ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Status, Logging and Persisted state

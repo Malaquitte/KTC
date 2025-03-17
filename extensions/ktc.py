@@ -1331,7 +1331,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 raise self.printer.command_error(msg)
             return False
 
-    cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT_help = "Initialize the tool lock shaft by homing to endstop and backing off"
+    cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT_help = "Initialize the tool lock shaft by homing to endstop and backing off in horizontal position."
 
     def cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT(self, gcmd):
         """Handle the KTC_INITIALIZE_TOOL_LOCK_SHAFT g-code command"""
