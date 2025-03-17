@@ -1127,34 +1127,6 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                     {self.log.seconds_to_human_string(time_deselecting)}\n"
             )
 
-    def get_endstop_state(self, endstop_name):
-        """Get status of specific endstop.
-        Returns:
-            bool: True if endstop name is triggered.
-                    None if an error occurs.
-        """            
-        try:
-            endstop = None
-            toolhead = typing.cast('klippy_th.ToolHead', self.printer.lookup_object("toolhead"))
-            query_endstops = typing.cast('klippy_qe.QueryEndstops', self.printer.lookup_object("query_endstops"))
-            
-            for es, name in query_endstops.endstops:
-                if name == endstop_name:
-                    endstop = typing.cast('klippy_mcu.MCU_endstop', es)
-                    break
-            if endstop is None:
-                raise self.printer.command_error(f"Unknown endstop '{endstop_name}'")
-
-            last_move_time = toolhead.get_last_move_time()
-            is_triggered = bool(endstop.query_endstop(last_move_time))
-            return is_triggered
-        
-        except Exception as e:
-            self.log.always(f"Endstop reading error {endstop_name}: {str(e)}")
-            import traceback
-            self.log.always(traceback.format_exc())
-            return None
-
     def check_tool_endstop_configuration(self):
         """
         Checks consistency between the states of toolchanger endstops and tool docks.
@@ -1170,11 +1142,37 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
         toolChanger_Axes_name = "manual_stepper tool_lock"
         
+        # tion to obtain the state of an endstop
+        def get_endstop_state(endstop_name):
+            try:
+                endstop = None
+                toolhead = typing.cast('klippy_th.ToolHead', self.printer.lookup_object("toolhead"))
+                
+                query_endstops = typing.cast('klippy_qe.QueryEndstops',
+                                     self.printer.lookup_object("query_endstops"))
+                
+                for es, name in query_endstops.endstops:
+                    if name == endstop_name:
+                        endstop = typing.cast('klippy_mcu.MCU_endstop', es)
+                        break
+                if endstop is None:
+                    raise self.printer.command_error(f"Unknown endstop '{endstop_name}'")
+
+                last_move_time = toolhead.get_last_move_time()
+                is_triggered = bool(endstop.query_endstop(last_move_time))
+                return is_triggered
+
+            except Exception as e:
+                self.log.always(f"Endstop reading error {endstop_name}: {str(e)}")
+                import traceback
+                self.log.always(traceback.format_exc())
+                return None
+        
         # Recovering endstop status
         self.log.always("retrieving endstop state from toolchanger")
-        tc_state = self.get_endstop_state(toolchanger_endstop_name)
+        tc_state = get_endstop_state(toolchanger_endstop_name)
         self.log.always("retrieving endstop state from tool rack")
-        dock_states = {dock: self.get_endstop_state(dock) for dock in dock_endstops_names}
+        dock_states = {dock: get_endstop_state(dock) for dock in dock_endstops_names}
         
         # Status log for debugging
         self.log.always(f"Toolchanger status ({toolchanger_endstop_name}): {tc_state}")
@@ -1214,7 +1212,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             missing_docks = [dock for dock, state in dock_states.items() if state is False]
             self.log.always(f"ENDSTOPS OK: The {missing_docks[0]} dock tool is attached to the toolchanger")
         
-        axis_state = self.get_endstop_state(toolChanger_Axes_name)
+        axis_state = get_endstop_state(toolChanger_Axes_name)
         if tools_off_dock == 0 and axis_state is True:
             self.log.always("ENDSTOPS ERROR: Toolchanger shaft in locking position without tool selected")
             raise self.printer.command_error("ENDSTOPS ERROR: Toolchanger shaft in locking position without tool selected")
@@ -1240,9 +1238,32 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         toolchanger_endstop_name = "manual_stepper tchead_endstop"
         dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
         
+        # Function to check endstop state
+        def get_endstop_state(endstop_name):
+            try:
+                endstop = None
+                toolhead = typing.cast('klippy_th.ToolHead', self.printer.lookup_object("toolhead"))
+                query_endstops = typing.cast('klippy_qe.QueryEndstops', self.printer.lookup_object("query_endstops"))
+                
+                for es, name in query_endstops.endstops:
+                    if name == endstop_name:
+                        endstop = typing.cast('klippy_mcu.MCU_endstop', es)
+                        break
+                if endstop is None:
+                    raise self.printer.command_error(f"Unknown endstop '{endstop_name}'")
+
+                last_move_time = toolhead.get_last_move_time()
+                is_triggered = bool(endstop.query_endstop(last_move_time))
+                return is_triggered
+            except Exception as e:
+                self.log.always(f"Endstop reading error {endstop_name}: {str(e)}")
+                import traceback
+                self.log.always(traceback.format_exc())
+                return None
+        
         # Check toolchanger state
-        tc_state = self.get_endstop_state(toolchanger_endstop_name)
-        dock_states = {dock: self.get_endstop_state(dock) for dock in dock_endstops_names}
+        tc_state = get_endstop_state(toolchanger_endstop_name)
+        dock_states = {dock: get_endstop_state(dock) for dock in dock_endstops_names}
         tools_off_dock = sum(1 for state in dock_states.values() if state is False)
         
         # Check if a tool is engaged in the toolchanger
