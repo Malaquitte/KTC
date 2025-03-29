@@ -1281,7 +1281,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always("Moving to endstop...")
             self.gcode.run_script_from_command(
                 f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                f"ACCEL={homing_accel} MOVE=180 STOP_ON_ENDSTOP=1"
+                f"ACCEL={homing_accel} MOVE=200 STOP_ON_ENDSTOP=1"
             )
             
             # set position to 0
@@ -1291,11 +1291,14 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             current_position = tool_lock_stepper.get_position()[0]  # Get position value
             self.log.always(f"Endstop triggered at position: {current_position} steps")
 
-            # Now move back by 115 steps
-            self.log.always("Moving back -115 steps from endstop position")
+            # Now move back by -160 steps
+            self.log.always("Moving back -160 steps from endstop position")
             self.gcode.run_script_from_command(
                 f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                f"ACCEL={homing_accel} MOVE=-115"
+                f"ACCEL={homing_accel} MOVE=-160"
+                
+            # set position to 0
+            tool_lock_stepper.do_set_position(0)                
             )
             
             self.log.always("Tool lock shaft initialization complete")
