@@ -1264,8 +1264,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             homing_accel = 100  # Steps per second squared
             
             # Display current position before homing
-            current_position = tool_lock_stepper.get_position()[0]
-            self.log.always(f"Home Endstop position: {current_position} steps")
+            #current_position = tool_lock_stepper.get_position()[0]
+            #self.log.always(f"Home Endstop position: {current_position} steps")
 
             # First check if endstop is already triggered
             query_endstop_continuesly.query_endstop("manual_stepper tool_lock", True, 1)
@@ -1286,22 +1286,18 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             
             # set position to 0
             tool_lock_stepper.do_set_position(0)
-                        
-            # Get current position after homing
-            current_position = tool_lock_stepper.get_position()[0]  # Get position value
-            self.log.always(f"Endstop triggered at position: {current_position} steps")
 
-            # Now move back by -160 steps
-            self.log.always("Moving back -160 steps from endstop position")
+            # Now move back by -110 steps
+            self.log.always("Moving back -110 steps from endstop position")
             self.gcode.run_script_from_command(
                 f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                f"ACCEL={homing_accel} MOVE=-160"
+                f"ACCEL={homing_accel} MOVE=-110"
             )
 
             # set position to 0
             tool_lock_stepper.do_set_position(0)                
                         
-            self.log.always("Tool lock shaft initialization complete")
+            self.log.always("Tool lock shaft initialization complete, now position 0 is unlock state")
             return True
             
         except Exception as e:
