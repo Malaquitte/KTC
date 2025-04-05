@@ -1183,7 +1183,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         
         # If an endstop could not be read, return an error
         if tc_state is None or None in dock_states.values():
-            raise self.printer.command_error("Enable to read all endstops states")
+            raise self.printer.command_error("Unable to read all endstops states")
         
         # Count how many tools are missing from their doc
         tools_off_dock = sum(1 for state in dock_states.values() if state is False)
@@ -1287,11 +1287,11 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             # set position to 0
             tool_lock_stepper.do_set_position(0)
 
-            # Now move back by -100 steps
-            self.log.always("Moving back -100 steps from endstop position")
+            # Now move back by -50 steps
+            self.log.always("Moving back -50 steps from endstop position")
             self.gcode.run_script_from_command(
                 f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                f"ACCEL={homing_accel} MOVE=-100"
+                f"ACCEL={homing_accel} MOVE=-50"
             )
 
             # set position to 0
