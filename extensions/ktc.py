@@ -1185,7 +1185,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         
         # If an endstop could not be read, return an error
         if tc_state is None or None in dock_states.values():
-            raise self.printer.command_error("Enable to read all endstops states")
+            raise self.printer.command_error("Unable to read all endstops states")
         
         # Count how many tools are missing from their doc
         tools_off_dock = sum(1 for state in dock_states.values() if state is False)
@@ -1269,8 +1269,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             homing_accel = 100  # Steps per second squared
             
             # Display current position before homing
-            current_position = tool_lock_stepper.get_position()[0]
-            self.log.always(f"Home Endstop position: {current_position} steps")
+            #current_position = tool_lock_stepper.get_position()[0]
+            #self.log.always(f"Home Endstop position: {current_position} steps")
 
             # First check if endstop is already triggered
             query_endstop_continuesly.query_endstop("manual_stepper tool_lock", True, 1)
@@ -1286,7 +1286,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always("Moving to endstop...")
             self.gcode.run_script_from_command(
                 f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                f"ACCEL={homing_accel} MOVE=180 STOP_ON_ENDSTOP=1"
+                f"ACCEL={homing_accel} MOVE=200 STOP_ON_ENDSTOP=1"
             )
                         
             # Get current position after triggering
@@ -1301,7 +1301,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always("Moving back -115 steps from endstop position")
             self.gcode.run_script_from_command(
                 f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                f"ACCEL={homing_accel} MOVE=-115"
+                f"ACCEL={homing_accel} MOVE=-50"
             )
             
             # set position to 0
