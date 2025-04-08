@@ -1164,6 +1164,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         2. If no tool is detected on the toolchanger, all tools must be present on the rack
         3. If all tools are on the rack, no tools should be detected on the toolchanger.
         
+        axis_state = True if the tool lock shaft is in open position.
+        axis_state = False if the tool lock shaft is in locking position.
         """
         # Endstop names (these must correspond to your configuration definitions)
         toolchanger_endstop_name = "manual_stepper tchead_endstop"
@@ -1215,11 +1217,11 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always(f"ENDSTOPS OK: The {missing_docks[0]} dock tool is attached to the toolchanger")
         
         axis_state = self.get_endstop_state(toolChanger_Axes_name)
-        if tools_off_dock == 0 and axis_state is True:
+        if tools_off_dock == 0 and axis_state is False:
             self.log.always("ENDSTOPS ERROR: Toolchanger shaft in locking position without tool selected")
             raise self.printer.command_error("ENDSTOPS ERROR: Toolchanger shaft in locking position without tool selected")
         
-        if tools_off_dock != 0 and axis_state is False:
+        if tools_off_dock != 0 and axis_state is True:
             self.log.always("ENDSTOPS ERROR: Toolchanger axis is in open position with tool selected")
             raise self.printer.command_error("ENDSTOPS ERROR: Toolchanger axis is in open position with tool selected")
 
@@ -1228,32 +1230,35 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
     def initialize_tool_lock_shaft(self, gcmd=None):
         """
         Initialize the tool lock shaft by:
-        1. Rotating until endstop is triggered
-        2. Set ToolChanger motor position to 0
-        2. Moving back by x steps once shaft is in horizontal position
+        1. Checking if all endstops are in a valid configuration
+        2. Rotating until endstop is triggered
+        3. Set ToolChanger motor position to 0
+        4. Moving back by x steps once shaft is in horizontal position
         
         This method uses the query_endstop_continuesly module.
+        
+        Returns:
+            bool: True if initialization completed successfully, False otherwise
         """
         self.log.always("Initializing tool lock shaft...")
         
-        # Check for tool already engaged in toolchanger
-        toolchanger_endstop_name = "manual_stepper tchead_endstop"
-        dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
-        
-        # Check toolchanger state
-        tc_state = self.get_endstop_state(toolchanger_endstop_name)
-        dock_states = {dock: self.get_endstop_state(dock) for dock in dock_endstops_names}
-        tools_off_dock = sum(1 for state in dock_states.values() if state is False)
-        
-        # Check if a tool is engaged in the toolchanger
-        if tc_state is True and tools_off_dock == 1:
-            msg = "Cannot initialize tool lock shaft: A tool is currently engaged in the toolchanger"
-            self.log.always(msg)
+        # First check if endstops are in a valid configuration
+        try:
+            valid, message = self.check_tool_endstop_configuration()
+            if not valid:
+                error_msg = f"Cannot initialize tool lock shaft: {message}"
+                self.log.always(error_msg)
+                if gcmd:
+                    gcmd.respond_info(error_msg)
+                return False
+        except Exception as e:
+            error_msg = f"Cannot initialize tool lock shaft: Error checking endstop configuration: {str(e)}"
+            self.log.always(error_msg)
             if gcmd:
-                gcmd.respond_info(msg)
+                gcmd.respond_info(error_msg)
             return False
         
-        # Proceed with initialization if no tool is engaged
+        # Proceed with initialization if endstop configuration is valid
         try:
             # Get the necessary objects
             tool_lock_stepper = self.printer.lookup_object("manual_stepper tool_lock")
@@ -1274,23 +1279,24 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 # Move away with actual manual stepper command
                 self.gcode.run_script_from_command(
                     f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                    f"ACCEL={homing_accel} MOVE=-20"
+                    f"ACCEL={homing_accel} MOVE=-100"
                 )
             
-            # Move to endstop using homing move
+            # Move to endstop using trigger
             self.log.always("Moving to endstop...")
             self.gcode.run_script_from_command(
                 f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
                 f"ACCEL={homing_accel} MOVE=180 STOP_ON_ENDSTOP=1"
             )
-            
-            # set position to 0
-            tool_lock_stepper.do_set_position(0)
                         
-            # Get current position after homing
-            current_position = tool_lock_stepper.get_position()[0]  # Get position value
+            # Get current position after triggering
+            current_position = tool_lock_stepper.get_position()[0]
             self.log.always(f"Endstop triggered at position: {current_position} steps")
 
+            # set position to 0
+            tool_lock_stepper.do_set_position(0)
+            self.log.always("Set 0 position to unlock state")
+                        
             # Now move back by 115 steps
             self.log.always("Moving back -115 steps from endstop position")
             self.gcode.run_script_from_command(
@@ -1298,7 +1304,9 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 f"ACCEL={homing_accel} MOVE=-115"
             )
             
-            self.log.always("Tool lock shaft initialization complete")
+            # set position to 0
+            tool_lock_stepper.do_set_position(0)
+            self.log.always("Tool lock shaft initialization complete with 0 position set to unlock state")
             return True
             
         except Exception as e:
@@ -1310,11 +1318,15 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 raise self.printer.command_error(msg)
             return False
 
-    cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT_help = "Initialize the tool lock shaft by homing to endstop and backing off in horizontal position."
+    cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT_help = "Initialize the tool lock shaft by homing to endstop and backing off in horizontal position. Only works if endstop configuration is valid."
 
     def cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT(self, gcmd):
         """Handle the KTC_INITIALIZE_TOOL_LOCK_SHAFT g-code command"""
-        self.initialize_tool_lock_shaft(gcmd)
+        success = self.initialize_tool_lock_shaft(gcmd)
+        if success:
+            gcmd.respond_info("Tool lock shaft initialized successfully.")
+        else:
+            gcmd.respond_info("Tool lock shaft initialization failed. Check logs for details.")
 
 def load_config(config):
     # prof = cProfile.Profile()
