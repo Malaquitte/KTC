@@ -968,8 +968,9 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             homed = toolhead.get_status(curtime)["homed_axes"].upper()
 
             if all(axis in homed for axis in tuple(required_axes)):
+                self.log.always("Tous les axes requis sont homed.")
                 return True
-
+            self.log.always("Tous les axes requis ne sont pas homed.")
             return False
 
         if tool in self.INVALID_TOOLS:
