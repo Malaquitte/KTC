@@ -977,15 +977,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             raise ValueError("KTC is in error state")
         if tool.state == tool.StateType.ERROR:
             raise ValueError("Tool is in error state")
-        #OLI
-        self.log.always(f"OLI: Required axis are: {tool.requires_axis_homed}")
-        curtime = self.printer.get_reactor().monotonic()
-        toolhead = self.printer.lookup_object("toolhead")
-        homed = toolhead.get_status(curtime)["homed_axes"].upper()
-        self.log.always(f"OLI: Homed axes are: {homed}")
-        result = _printer_is_homed_for_toolchange(tool.requires_axis_homed)
-        self.log.always(f"OLI: Printer is homed for toolchange returned: {result}")
-        #OLI END
+
         if not _printer_is_homed_for_toolchange(tool.requires_axis_homed):
             raise ValueError(
                 "Printer is not homed for toolchange"

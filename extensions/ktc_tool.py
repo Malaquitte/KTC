@@ -94,16 +94,13 @@ class KtcTool(KtcBaseToolClass, KtcConstantsClass):
         self.run_with_profile(self.select, final_selected=True)
 
     def select(self, final_selected=False):
-        self.log.always("OLI: Entering select() method")
         self.state = self.StateType.SELECTING
         try:
             self.log.always("KTC Tool %s Selecting." % self.name)
             at = self._ktc.active_tool
 
             # Check if homed
-            self.log.always("OLI: On teste que tous les axes requis sont homed")
             self._ktc.confirm_ready_for_toolchange(self)
-            self.log.always("OLI: On sort du test de tous les axes requis")
 
             # None of this is needed if this is not the final tool.
             if final_selected:
