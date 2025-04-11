@@ -961,7 +961,6 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         def _printer_is_homed_for_toolchange(self, required_axes: str = ""):
             # If no axes are required, then return True.
             if required_axes == "":
-                self.log.always("OLI: Aucuns axes requis")
                 return True
 
             curtime = self.printer.get_reactor().monotonic()
@@ -969,9 +968,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             homed = toolhead.get_status(curtime)["homed_axes"].upper()
 
             if all(axis in homed for axis in tuple(required_axes)):
-                self.log.always("OLI: Tous les axes requis sont homed.")
                 return True
-            self.log.always("OLI: Tous les axes requis ne sont pas homed.")
             return False
 
         if tool in self.INVALID_TOOLS:
@@ -980,6 +977,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             raise ValueError("KTC is in error state")
         if tool.state == tool.StateType.ERROR:
             raise ValueError("Tool is in error state")
+        if required_axes == "":
+            self.log.always("OLI: Aucuns Axes requis")
         if not _printer_is_homed_for_toolchange(tool.requires_axis_homed):
             raise ValueError(
                 "Printer is not homed for toolchange"
