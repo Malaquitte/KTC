@@ -1217,6 +1217,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always(f"ENDSTOPS OK: The {missing_docks[0]} dock tool is attached to the toolchanger")
         
         axis_state = self.get_endstop_state(toolChanger_Axes_name)
+# Code commenté en attendant d'avoir un endstop de lock de l'axe du toolchanger
 #        if tools_off_dock == 0 and axis_state is False:
 #            self.log.always("ENDSTOPS ERROR: Toolchanger shaft in locking position without tool selected")
 #            raise self.printer.command_error("ENDSTOPS ERROR: Toolchanger shaft in locking position without tool selected")
