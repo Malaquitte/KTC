@@ -958,7 +958,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         return status
 
     def confirm_ready_for_toolchange(self, tool: KtcBaseToolClass):
-        def _printer_is_homed_for_toolchange(self, required_axes: str = ""):
+        def _printer_is_homed_for_toolchange(required_axes: str = ""):
             # If no axes are required, then return True.
             if required_axes == "":
                 return True
