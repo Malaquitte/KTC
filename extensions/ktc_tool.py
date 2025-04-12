@@ -102,6 +102,7 @@ class KtcTool(KtcBaseToolClass, KtcConstantsClass):
             # Check if homed
             if not self._ktc.confirm_ready_for_toolchange(self):
                 self.printer.lookup_object("gcode").respond_info("Tous les axes requis par le tool ne sont pas homés.")
+                self.printer.send_event("notify_gcode_response", "Tous les axes requis par le tool ne sont pas homés.")
                 return
 
             # None of this is needed if this is not the final tool.
