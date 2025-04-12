@@ -978,12 +978,13 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         if tool.state == tool.StateType.ERROR:
             raise ValueError("Tool is in error state")
 
-        if not _printer_is_homed_for_toolchange(tool.requires_axis_homed):
-            raise ValueError(
-                "Printer is not homed for toolchange"
-                + "Required axis %s not homed for ktc_tool %s."
-                % (tool.requires_axis_homed, tool.name)
-            )
+        return _printer_is_homed_for_toolchange(tool.requires_axis_homed)
+        #if not _printer_is_homed_for_toolchange(tool.requires_axis_homed):
+        #    raise ValueError(
+        #        "Printer is not homed for toolchange"
+        #        + "Required axis %s not homed for ktc_tool %s."
+        #        % (tool.requires_axis_homed, tool.name)
+        #    )
 
     def get_tool_from_gcmd(
         self, gcmd: "gcode.GCodeCommand", allow_invalid_active_tool: bool = True,
