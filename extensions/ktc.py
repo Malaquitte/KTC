@@ -1299,11 +1299,11 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 tool_lock_stepper.do_set_position(0)
                 self.log.always("Set 0 position to unlock state")
                             
-                # Now move back by 115 steps
-                self.log.always("Moving back -115 steps from endstop position")
+                # Now move back by 60 steps
+                self.log.always("Moving back -60 steps from endstop position")
                 self.gcode.run_script_from_command(
                     f"MANUAL_STEPPER STEPPER=tool_lock SPEED={homing_speed} "
-                    f"ACCEL={homing_accel} MOVE=-115"
+                    f"ACCEL={homing_accel} MOVE=-60"
                 )
                 
                 # set position to 0
