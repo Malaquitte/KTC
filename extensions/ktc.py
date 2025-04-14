@@ -1390,7 +1390,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                         return False
                     
                     # Réinitialiser l'état du système pour reconnaître l'outil
-                    toolchanger.state = self.StateType.READY
+                    toolchanger.state = self.StateType.ENGAGED
                     toolchanger.selected_tool = tool
                     self.active_tool = tool
                     
@@ -1405,7 +1405,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                             return False
                         
                         # Déposer l'outil
-                        ##tool.deselect()
+                        tool.deselect()
                         respond_msg(f"Outil T{missing_tool} déposé avec succès dans son dock")
                         
                     except Exception as e:
