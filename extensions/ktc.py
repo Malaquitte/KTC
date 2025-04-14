@@ -1333,122 +1333,123 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
 
     def reset_unknown_tool(self, gcmd=None):
         """
-        Détermine quel outil est actuellement sur le toolchanger en vérifiant 
-        les fins de course des docks et réinitialise l'état du système en conséquence.
-        Si un outil est sur le toolchanger, le système le remettra automatiquement à son dock.
+        Determines which tool is currently on the toolchanger by checking the
+        dock limit switches and resets the system status accordingly.
+        If a tool is on the toolchanger, the system will automatically return it to its dock.
         
         Args:
-            gcmd: Objet GCodeCommand optionnel pour les réponses à l'utilisateur
+            gcmd: Optional GCodeCommand object for user responses
         
         Returns:
-            bool: True si la réinitialisation a réussi, False sinon
+            bool: True if the reset was successful, False otherwise
         """
-        # Définir les noms des fins de course
+        # Define limit switch names
         toolchanger_endstop_name = "manual_stepper tchead_endstop"
         dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
         
-        # Fonction pour envoyer des messages selon le contexte
+        # Function for sending messages according to context
         def respond_msg(msg):
             self.log.always(msg)
             if gcmd:
                 gcmd.respond_info(msg)
         
         try:
-            # Vérifier si un outil est sur le toolchanger
+            # Check whether a tool is on the toolchanger
             tc_has_tool = self.get_endstop_state(toolchanger_endstop_name)
             
             if tc_has_tool is None:
-                respond_msg("Impossible de lire l'état du fin de course du toolchanger")
+                respond_msg("Unable to read status of toolchanger limit switch")
                 return False
             
             if tc_has_tool:
-                respond_msg("Un outil est détecté sur le toolchanger, vérification des docks...")
+                respond_msg("A tool is detected on the toolchanger, checking the docks...")
                 
-                # Vérifier quels outils manquent dans les docks
+                # Check what tools are missing from the docks
                 missing_tool = -1
                 for i in range(len(dock_endstops_names)):
                     dock_has_tool = self.get_endstop_state(dock_endstops_names[i])
                     
                     if dock_has_tool is None:
-                        respond_msg(f"Impossible de lire l'état du fin de course {dock_endstops_names[i]}")
+                        respond_msg(f"Unable to read limit switch status {dock_endstops_names[i]}")
                         return False
                     
                     if not dock_has_tool:
                         missing_tool = i
-                        respond_msg(f"Outil T{missing_tool} détecté comme manquant de son dock")
+                        respond_msg(f"Tool T{missing_tool} detected as missing from its dock")
                 
                 if missing_tool >= 0:
-                    # Un outil manquant a été identifié
-                    respond_msg(f"L'outil T{missing_tool} est probablement sur le toolchanger")
+                    # A missing tool has been identified
+                    respond_msg(f"Tool T{missing_tool} is probably on the toolchanger")
                     
-                    # Récupérer le toolchanger et l'outil
+                    # Recover the toolchanger and the tool
                     toolchanger = self.all_toolchangers.get("malaquitte")
                     tool = self.all_tools_by_number.get(missing_tool)
                     
                     if not toolchanger or not tool:
-                        respond_msg(f"Erreur: impossible de trouver le toolchanger ou l'outil T{missing_tool}")
+                        respond_msg(f"Error: unable to find the toolchanger or tool T{missing_tool}")
                         return False
                     
-                    # Réinitialiser l'état du système pour reconnaître l'outil
+                    # Reset the system status to recognise the tool
                     toolchanger.state = self.StateType.ENGAGED
                     toolchanger.selected_tool = tool
                     self.active_tool = tool
                     
-                    respond_msg(f"État du système réinitialisé avec T{missing_tool} comme outil actif")
+                    respond_msg(f"System status reset with T{missing_tool} as an active tool")
                     
-                    # Déposer l'outil dans son dock
-                    respond_msg(f"Dépose de l'outil T{missing_tool} dans son dock...")
+                    # Place the tool in its dock
+                    respond_msg(f"Replacing tool T{missing_tool} in its dock...")
                     try:
-                        # Vérifier si les axes sont homés avant de tenter un mouvement
+                        # Check that the axles are aligned before attempting any movement.
                         if not self.confirm_ready_for_toolchange(tool):
-                            respond_msg("Les axes nécessaires ne sont pas homés. Exécutez G28 avant de continuer.")
+                            respond_msg("The axes required are not homed. Run G28 before continuing.")
                             return False
                         
-                        # Déposer l'outil
+                        # Replace the tool
                         tool.deselect()
-                        respond_msg(f"Outil T{missing_tool} déposé avec succès dans son dock")
+                        respond_msg(f"Tool T{missing_tool} successfully returned to its dock")
 
-                        # Déplacer le toolchanger dans la zone de sécurité
-                        respond_msg("Déplacement du toolchanger dans la zone de sécurité...")
+                        # Move the toolchanger into the safety zone
+                        respond_msg("Moving the toolchanger into the safety zone...")
 
-                        # Récupérer la zone de sécurité du tool
-                        safe_zone = tool.params.get('params_zone', 190)  # Valeur par défaut 340 si non spécifiée
+                        # Recovering the tool's safety zone
+                        # Default value 190 if not specified
+                        safe_zone = tool.params.get('params_zone', 190)  
                         
-                        # Déplacer vers la zone de sécurité
+                        # Move to the safety zone
                         self.gcode.run_script_from_command(f"G0 Y{safe_zone} F3000")
-                        respond_msg("Toolchanger déplacé en zone de sécurité")    
+                        respond_msg("Toolchanger moved to safety zone")    
                         
                     except Exception as e:
-                        respond_msg(f"Erreur lors de la dépose de l'outil: {str(e)}")
+                        respond_msg(f"Error when removing the tool: {str(e)}")
                         return False
                     
-                    respond_msg("Réinitialisation terminée, le système est prêt à être utilisé")
+                    respond_msg("Reset complete, the system is ready for use")
                     return True
                 else:
-                    respond_msg("ERREUR: Un outil est sur le toolchanger mais tous les docks semblent occupés!")
-                    respond_msg("Vérifiez manuellement votre configuration")
+                    respond_msg("ERROR: A tool is on the toolchanger but all the docks seem to be occupied!")
+                    respond_msg("Manually check your configuration")
                     return False
             else:
-                respond_msg("Aucun outil détecté sur le toolchanger")
+                respond_msg("No tools detected on the toolchanger")
                 
-                # Réinitialiser à l'état sans outil
+                # Reset to tool-free status
                 toolchanger = self.all_toolchangers.get("malaquitte")
                 if not toolchanger:
-                    respond_msg("Erreur: impossible de trouver le toolchanger malaquitte")
+                    respond_msg("Error: unable to find toolchanger")
                     return False
                 
                 toolchanger.selected_tool = self.TOOL_NONE
                 self.active_tool = self.TOOL_NONE
                 toolchanger.initialize()
                 
-                respond_msg("État du système réinitialisé")
+                respond_msg("System status reset")
                 
                 # Afficher l'état des toolchangers
                 respond_msg(self._toolchangers_status_to_human_string())
                 return True
         
         except Exception as e:
-            error_msg = f"Erreur lors de la réinitialisation de l'outil inconnu: {str(e)}"
+            error_msg = f"Error when resetting unknown tool: {str(e)}"
             self.log.always(error_msg)
             if gcmd:
                 gcmd.respond_info(error_msg)
@@ -1456,15 +1457,13 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always(traceback.format_exc())
             return False
 
-    # Ajoutez cette fonction comme méthode à la classe Ktc
-
     cmd_KTC_RESET_UNKNOWN_TOOL_help = "Determines which tool is currently on the toolchanger, resets it, and places it back in its dock if necessary."
 
     def cmd_KTC_RESET_UNKNOWN_TOOL(self, gcmd):
         """Handle the KTC_RESET_UNKNOWN_TOOL g-code command"""
         success = self.reset_unknown_tool(gcmd)
         if not success:
-            gcmd.respond_info("La réinitialisation de l'outil inconnu a échoué. Consultez les logs pour plus de détails.")
+            gcmd.respond_info("The reset of the unknown tool has failed. See the logs for more details.")
             
 def load_config(config):
     # prof = cProfile.Profile()
