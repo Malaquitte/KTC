@@ -10,7 +10,8 @@
   | `KTC_TOOL_SET_TEMPERATURE [TOOL=<name> \| T=<index>] [ACTV_TMP=<temperature>] [STDB_TMP=<temperature>] [CHNG_STATE=<0\|1\|2>\|<OFF\|STANDBY\|ACTIVE>] [STDB_TIMEOUT=<seconds>] [SHTDWN_TIMEOUT=<seconds>]` | Change temperature settings for active or specified tool. |
   | `KTC_SET_AND_SAVE_PARTFAN_SPEED [TOOL=<name> \| T=<index>] [S=<value>]` | Set the part cooling fan speed for the active or specified tool. If no speed value is specified, the fan will run at full speed by default. |
   | `KTC_TEMPERATURE_WAIT_WITH_TOLERANCE [TOOL=<name> \| T=<index>] [TOLERANCE=<0-9>]` | Waits for the specified tool or heater's temperature to reach its target temperature with a set tolerance. The default tolerance is 1°C. If no tool or heater is specified, it waits for all temperatures to reach their target temperatures. |
-  | `KTC_TOOLCHANGERS_DISPLAY` | Report the current mapping of selected toolchanger |
+  | `KTC_TOOLCHANGERS_DISPLAY` | Report the current mapping of selected toolchanger. |
+  | `KTC_RESET_UNKNOWN_TOOL` | Determines which tool is currently on the toolchanger, resets it, and places it back in its dock if necessary. |
   <br>
 
   ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Offset commands
