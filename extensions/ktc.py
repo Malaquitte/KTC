@@ -1407,6 +1407,16 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                         # Déposer l'outil
                         tool.deselect()
                         respond_msg(f"Outil T{missing_tool} déposé avec succès dans son dock")
+
+                        # Déplacer le toolchanger dans la zone de sécurité
+                        respond_msg("Déplacement du toolchanger dans la zone de sécurité...")
+
+                        # Récupérer la zone de sécurité du tool
+                        safe_zone = tool.params.get('params_zone', 190)  # Valeur par défaut 340 si non spécifiée
+                        
+                        # Déplacer vers la zone de sécurité
+                        self.gcode.run_script_from_command(f"G0 Y{safe_zone} F3000")
+                        respond_msg("Toolchanger déplacé en zone de sécurité")    
                         
                     except Exception as e:
                         respond_msg(f"Erreur lors de la dépose de l'outil: {str(e)}")
