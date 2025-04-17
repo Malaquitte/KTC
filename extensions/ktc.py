@@ -1445,7 +1445,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 respond_msg("System status reset")
                 
                 # Display the Toolchangers status
-                respond_msg(self._toolchangers_status_to_human_string())
+                #respond_msg(self._toolchangers_status_to_human_string())
                 return True
         
         except Exception as e:
