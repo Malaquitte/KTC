@@ -1397,31 +1397,31 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                     respond_msg(f"System status reset with T{missing_tool} as an active tool")
                     
                     # Place the tool in its dock
-                    respond_msg(f"Replacing tool T{missing_tool} in its dock...")
-                    try:
-                        # Check that the axles are aligned before attempting any movement.
-                        if not self.confirm_ready_for_toolchange(tool):
-                            respond_msg("The axes required are not homed. Run G28 before continuing.")
-                            return False
-                        
-                        # Replace the tool
-                        tool.deselect()
-                        respond_msg(f"Tool T{missing_tool} successfully returned to its dock")
+                    #respond_msg(f"Replacing tool T{missing_tool} in its dock...")
+                    #try:
+                    #    # Check that the axles are aligned before attempting any movement.
+                    #    if not self.confirm_ready_for_toolchange(tool):
+                    #        respond_msg("The axes required are not homed. Run G28 before continuing.")
+                    #        return False
+                    #    
+                    #    # Replace the tool
+                    #    tool.deselect()
+                    #    respond_msg(f"Tool T{missing_tool} successfully returned to its dock")
 
-                        # Move the toolchanger into the safety zone
-                        respond_msg("Moving the toolchanger into the safety zone...")
+                    #    # Move the toolchanger into the safety zone
+                    #    respond_msg("Moving the toolchanger into the safety zone...")
 
-                        # Recovering the tool's safety zone
-                        # Default value 190 if not specified
-                        safe_zone = tool.params.get('params_zone', 190)  
+                    #    # Recovering the tool's safety zone
+                    #   # Default value 190 if not specified
+                    #    safe_zone = tool.params.get('params_zone', 190)  
                         
-                        # Move to the safety zone
-                        self.gcode.run_script_from_command(f"G0 Y{safe_zone} F3000")
-                        respond_msg("Toolchanger moved to safety zone")    
+                    #    # Move to the safety zone
+                    #    self.gcode.run_script_from_command(f"G0 Y{safe_zone} F3000")
+                    #    respond_msg("Toolchanger moved to safety zone")    
                         
-                    except Exception as e:
-                        respond_msg(f"Error when removing the tool: {str(e)}")
-                        return False
+                    #except Exception as e:
+                    #    respond_msg(f"Error when removing the tool: {str(e)}")
+                    #    return False
                     
                     respond_msg("Reset complete, the system is ready for use")
                     return True
@@ -1444,7 +1444,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 
                 respond_msg("System status reset")
                 
-                # Afficher l'état des toolchangers
+                # Display the Toolchangers status
                 respond_msg(self._toolchangers_status_to_human_string())
                 return True
         
