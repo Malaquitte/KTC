@@ -144,7 +144,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             "KTC_TOOL_MAP_NR",
             "KTC_DEBUG_HEATERS",
             "KTC_DEBUG_TOOLS",
-            "KTC_RESET_UNKNOWN_TOOL",
+            "KTC_INIT_CONFIG",
         ]
         for cmd in handlers:
             func = getattr(self, "cmd_" + cmd)
@@ -1331,7 +1331,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         else:
             gcmd.respond_info("Tool lock shaft initialization failed. Check logs for details.")
 
-    def reset_unknown_tool(self, gcmd=None):
+    def init_config(self, gcmd=None):
         """
         Determines which tool is currently on the toolchanger by checking the
         dock limit switches and resets the system status accordingly.
@@ -1457,11 +1457,11 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always(traceback.format_exc())
             return False
 
-    cmd_KTC_RESET_UNKNOWN_TOOL_help = "Determines which tool is currently on the toolchanger, resets it, and places it back in its dock if necessary."
+    cmd_KTC_INIT_CONFIG_help = "Determines which tool is currently on the toolchanger, resets it, and places it back in its dock if necessary."
 
-    def cmd_KTC_RESET_UNKNOWN_TOOL(self, gcmd):
-        """Handle the KTC_RESET_UNKNOWN_TOOL g-code command"""
-        success = self.reset_unknown_tool(gcmd)
+    def cmd_KTC_INIT_CONFIG(self, gcmd):
+        """Handle the KTC_INIT_CONFIG g-code command"""
+        success = self.init_config(gcmd)
         if not success:
             gcmd.respond_info("The reset of the unknown tool has failed. See the logs for more details.")
             
