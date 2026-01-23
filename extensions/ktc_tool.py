@@ -100,10 +100,7 @@ class KtcTool(KtcBaseToolClass, KtcConstantsClass):
             at = self._ktc.active_tool
 
             # Check if homed
-            if not self._ktc.confirm_ready_for_toolchange(self):
-                msg = "Tous les axes requis par le tool ne sont pas homés."
-                self.gcode.run_script_from_command(f'M118 {msg}')
-                return
+            self._ktc.confirm_ready_for_toolchange(self)
 
             # None of this is needed if this is not the final tool.
             if final_selected:

@@ -24,11 +24,11 @@ if typing.TYPE_CHECKING:
         heaters as klippy_heaters,
         # gcode_move as klippy_gcode_move,
         fan_generic as klippy_fan_generic,
+        # Defined by MalaSchir
         query_endstops as klippy_qe,
+        # End of Defined by MalaSchir
     )
     from . import ktc_log, ktc_persisting, ktc_toolchanger, ktc_tool, ktc_heater
-
-#from .ktc_context import check_tool_endstop_configuration
 
 # Constants for the restore_axis_on_toolchange variable.
 XYZ_TO_INDEX: dict[str, int] = {"x": 0, "X": 0, "y": 1, "Y": 1, "z": 2, "Z": 2}
@@ -146,6 +146,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             "KTC_TOOLCHANGERS_DISPLAY",
             "KTC_INITIALIZE_TOOL_LOCK_SHAFT",
             "KTC_INIT_CONFIG",
+            # End of Defined by MalaSchir
         ]
         for cmd in handlers:
             func = getattr(self, "cmd_" + cmd)
@@ -161,7 +162,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         )
         self._register_tool_gcode_commands()
 
-
+        # Defined by MalaSchir
         self.log.debug("DEBUG:Retrieving endstop configuration.") 
         self.log.always("ALWAYS:Retrieving endstop configuration.") 
 
@@ -170,7 +171,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always("Endstop configuration is valid.") 
         else:
             self.log.always(f"Endstop configuration is invalid: {message}")
-
+        # End of Defined by MalaSchir
+        
     def _config_default_toolchanger(self):
         """Set the default toolchanger and validate it."""
         # If a default toolchanger name is specified, validate it and set it as default.
@@ -858,6 +860,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
     # TOOL REMAPING                           #
     ###########################################
 
+    # Defined by MalaSchir
     def _toolchangers_status_to_human_string(self):
         msg = "KTC ToolToolChangers registered:"
 
@@ -888,6 +891,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         self, gcmd
     ):  # pylint: disable=invalid-name, unused-argument
         self.log.always(self._toolchangers_status_to_human_string())
+    # End of Defined by MalaSchir
 
     def _tool_map_to_human_string(self):
         msg = "KTC Tools registered:"
@@ -979,14 +983,12 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             raise ValueError("KTC is in error state")
         if tool.state == tool.StateType.ERROR:
             raise ValueError("Tool is in error state")
-
-        return _printer_is_homed_for_toolchange(tool.requires_axis_homed)
-        #if not _printer_is_homed_for_toolchange(tool.requires_axis_homed):
-        #    raise ValueError(
-        #        "Printer is not homed for toolchange"
-        #        + "Required axis %s not homed for ktc_tool %s."
-        #        % (tool.requires_axis_homed, tool.name)
-        #    )
+        if not _printer_is_homed_for_toolchange(tool.requires_axis_homed):
+            raise ValueError(
+                "Printer is not homed for toolchange"
+                + "Required axis %s not homed for ktc_tool %s."
+                % (tool.requires_axis_homed, tool.name)
+            )
 
     def get_tool_from_gcmd(
         self, gcmd: "gcode.GCodeCommand", allow_invalid_active_tool: bool = True,
@@ -1130,6 +1132,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                     {self.log.seconds_to_human_string(time_deselecting)}\n"
             )
 
+    # Defined by MalaSchir
     def get_endstop_state(self, endstop_name):
         """Get status of specific endstop.
         Returns:
@@ -1465,7 +1468,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         success = self.init_config(gcmd)
         if not success:
             gcmd.respond_info("The reset of the unknown tool has failed. See the logs for more details.")
-            
+    # End of Defined by MalaSchir
+
 def load_config(config):
     # prof = cProfile.Profile()
 
