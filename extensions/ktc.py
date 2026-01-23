@@ -163,14 +163,14 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         self._register_tool_gcode_commands()
 
         # Defined by MalaSchir
-        self.log.debug("DEBUG:Retrieving endstop configuration.") 
-        self.log.always("ALWAYS:Retrieving endstop configuration.") 
+        #self.log.debug("DEBUG:Retrieving endstop configuration.") 
+        #self.log.always("ALWAYS:Retrieving endstop configuration.") 
 
-        valid, message = self.check_tool_endstop_configuration()
-        if valid:
-            self.log.always("Endstop configuration is valid.") 
-        else:
-            self.log.always(f"Endstop configuration is invalid: {message}")
+        #valid, message = self.check_tool_endstop_configuration()
+        #if valid:
+        #    self.log.always("Endstop configuration is valid.") 
+        #else:
+        #    self.log.always(f"Endstop configuration is invalid: {message}")
         # End of Defined by MalaSchir
         
     def _config_default_toolchanger(self):
@@ -1174,7 +1174,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         axis_state = False if the tool lock shaft is in locking position.
         """
         # Endstop names (these must correspond to your configuration definitions)
-        toolchanger_endstop_name = "manual_stepper tchead_endstop"
+        toolchanger_endstop_name = "manual_stepper tchead_tool_grabbed"
         dock_endstops_names = ["manual_stepper t0dock_endstop", "manual_stepper t1dock_endstop"]
         toolChanger_Axes_name = "manual_stepper tool_lock"
         
@@ -1329,11 +1329,11 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
 
     def cmd_KTC_INITIALIZE_TOOL_LOCK_SHAFT(self, gcmd):
         """Handle the KTC_INITIALIZE_TOOL_LOCK_SHAFT g-code command"""
-        success = self.initialize_tool_lock_shaft(gcmd)
-        if success:
-            gcmd.respond_info("Tool lock shaft initialized successfully.")
-        else:
-            gcmd.respond_info("Tool lock shaft initialization failed. Check logs for details.")
+        #success = self.initialize_tool_lock_shaft(gcmd)
+        #if success:
+        #    gcmd.respond_info("Tool lock shaft initialized successfully.")
+        #else:
+        #    gcmd.respond_info("Tool lock shaft initialization failed. Check logs for details.")
 
     def init_config(self, gcmd=None):
         """
