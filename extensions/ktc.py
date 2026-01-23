@@ -138,12 +138,13 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             "KTC_HEATERS_PAUSE",
             "KTC_HEATERS_RESUME",
             "KTC_TOOLCHANGER_INITIALIZE",
-            "KTC_TOOLCHANGERS_DISPLAY",
-            "KTC_INITIALIZE_TOOL_LOCK_SHAFT",
             "KTC_TOOLS_DISPLAY",
             "KTC_TOOL_MAP_NR",
             "KTC_DEBUG_HEATERS",
             "KTC_DEBUG_TOOLS",
+            # Functions defined by MalaSchir
+            "KTC_TOOLCHANGERS_DISPLAY",
+            "KTC_INITIALIZE_TOOL_LOCK_SHAFT",
             "KTC_INIT_CONFIG",
         ]
         for cmd in handlers:
