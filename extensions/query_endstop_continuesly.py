@@ -87,8 +87,14 @@ class QueryEndstopContinuesly:
 
         # If atempts is -1 then we are running continuously.
         dwell = 0.1
-        if atempts == -1:
-            dwell = 1.0
+#########################################
+# Comment Out by MalaSchir (seems to risky to check every second in case if no limit query attempts)
+#########################################
+#         if atempts == -1:
+#            dwell = 1.0
+#########################################
+# Comment Out by MalaSchir
+#########################################
 
         a = 0   # Counter for the number of atempts
         # while not self._printer.is_shutdown()

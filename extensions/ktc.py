@@ -19,7 +19,11 @@ from .ktc_heater import HeaterStateType
 
 # Only import these modules in Dev environment. Consult Dev_doc.md for more info.
 if typing.TYPE_CHECKING:
+    # Modified by MalaSchir
+    # added :
+    #  mcu as klippy_mcu, toolhead as klippy_th
     from ...klipper.klippy import configfile, gcode, mcu as klippy_mcu, toolhead as klippy_th
+    # End of MalaSchir modification
     from ...klipper.klippy.extras import (
         heaters as klippy_heaters,
         # gcode_move as klippy_gcode_move,
@@ -1468,7 +1472,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         success = self.init_config(gcmd)
         if not success:
             gcmd.respond_info("The reset of the unknown tool has failed. See the logs for more details.")
-    # End of Defined by MalaSchir
+# End of Defined by MalaSchir
 
 def load_config(config):
     # prof = cProfile.Profile()
