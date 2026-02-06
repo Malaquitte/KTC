@@ -12,9 +12,14 @@
         "--disable=W0201"
     ],
     "python.analysis.typeCheckingMode": "standard",
-    // "python.analysis.extraPaths": [
-        // "../klipper/klippy/"
-    // ]
+     "python.analysis.extraPaths": [
+         "../klipper/klippy/"
+		 "../klipper/klippy/extras"
+     ]
+	 "python.autoComplete.extraPaths": [
+        "../klipper/klippy",
+        "../klipper/klippy/extras"
+    ],
     "python.analysis.diagnosticSeverityOverrides": {
         "reportArgumentType": "none"
     },
