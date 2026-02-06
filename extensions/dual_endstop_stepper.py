@@ -44,7 +44,7 @@ class DualEndstopStepper:
         wrapped_config = ConfigWrapper(config, endstop_pin_lock)
         
         # Create main rail with the lock endstop
-        self.rail = stepper.PrinterRail(
+        self.rail = stepper.LookupRail(
                 wrapped_config, need_position_minmax=False, default_position_endstop=0.)
         self.steppers = self.rail.get_steppers()
 
