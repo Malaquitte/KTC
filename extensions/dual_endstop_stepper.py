@@ -12,7 +12,7 @@ class DualEndstopStepper:
         # Get Printer and Section name
         self.printer = config.get_printer()
         self.name = config.get_name()
-        stepper_name = self.name.split()[1]
+        self.stepper_name = self.name.split()[1]
 
         # Retrieve both endstops pins, these are REQUIRED parameters
         endstop_pin_lock = config.get('endstop_pin_lock')
@@ -48,6 +48,14 @@ class DualEndstopStepper:
                 wrapped_config, need_position_minmax=False, default_position_endstop=0.)
         self.steppers = self.rail.get_steppers()
 
+        # The endstop has been registered with the section name, change it to a unique name
+        # ACCESSING KLIPPER INTERNAL VARIABLE - MIGHT REQUIRE REWORK AFTER KLIPPER UPDATE
+        query_endstops = self.printer.load_object(config, 'query_endstops')
+        index = next((i for i, (mcu_endstop, endstop_name) in enumerate(query_endstops.endstops) if endstop_name == self.name), None)
+        if index is None:
+            raise config.error("Failed to find registered LOCK endstop for %s" % self.name)
+        query_endstops.endstops[index] = (query_endstops.endstops[index][0], self.stepper_name + "_LOCK")
+
         # Create secondary MCU_Endstop for unlock
         self.mcu_endstop_unlock = self._create_mcu_endstop(config, endstop_pin_unlock)
 
@@ -67,7 +75,7 @@ class DualEndstopStepper:
         # Register commands
         gcode = self.printer.lookup_object('gcode')
         gcode.register_mux_command('DUAL_ENDSTOP_STEPPER', "STEPPER",
-                                   stepper_name, self.cmd_DUAL_ENDSTOP_STEPPER,
+                                   self.stepper_name, self.cmd_DUAL_ENDSTOP_STEPPER,
                                    desc=self.cmd_DUAL_ENDSTOP_STEPPER_help)
 
     def _create_mcu_endstop(self, config, endstop_pin_str):
@@ -80,9 +88,9 @@ class DualEndstopStepper:
         mcu_endstop = ppins.setup_pin('endstop', endstop_pin_str)
         mcu_endstop.add_stepper(self.rail.get_steppers()[0])
         
-        # Register it in query_endstops
+        # Register it in query_endstops but with a unique name to avoid conflicts with the main endstop
         query_endstops = self.printer.load_object(config, 'query_endstops')
-        query_endstops.register_endstop(mcu_endstop, self.name)
+        query_endstops.register_endstop(mcu_endstop, self.stepper_name + "_UNLOCK")
     
         return mcu_endstop
 
