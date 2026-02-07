@@ -133,8 +133,10 @@ class DualEndstopStepper:
         pos = [movepos, 0., 0., 0.]
 
         # Choose which endstop to use
+        endstops = []
         if use_unlock:
-            endstops = [self.mcu_endstop_unlock]
+            endstops.append((self.mcu_endstop_unlock, self.name))
+            #endstops = [self.mcu_endstop_unlock]
         else:
             endstops = self.rail.get_endstops()
         
