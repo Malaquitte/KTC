@@ -78,6 +78,7 @@ class DualEndstopStepper:
         
         # Create the MCU_Endstop via the pins system (with full validation)
         mcu_endstop = ppins.setup_pin('endstop', endstop_pin_str)
+        mcu_endstop.add_stepper(self.rail.get_steppers()[0])
         
         # Register it in query_endstops
         query_endstops = self.printer.load_object(config, 'query_endstops')
