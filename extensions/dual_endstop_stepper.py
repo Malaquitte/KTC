@@ -189,6 +189,43 @@ class DualEndstopStepper:
     def flush_step_generation(self):
         toolhead = self.printer.lookup_object('toolhead')
         toolhead.flush_step_generation()
-       
+
+    def get_position(self):
+        return [self.commanded_pos, 0., 0., 0.]
+    
+    def set_position(self, newpos, homing_axes=""):
+        self.do_set_position(newpos[0])
+
+    def get_last_move_time(self):
+        self.sync_print_time()
+        return self.next_cmd_time
+    
+    def dwell(self, delay):
+        self.next_cmd_time += max(0., delay)
+
+    def drip_move(self, newpos, speed, drip_completion):
+        # Submit move to trapq
+        self.sync_print_time()
+        start_time = self.next_cmd_time
+        end_time = self._submit_move(start_time, newpos[0],
+                                     speed, self.homing_accel)
+        # Drip updates to motors
+        self.motion_queuing.drip_update_time(start_time, end_time,
+                                             drip_completion)
+        # Clear trapq of any remaining parts of movement
+        self.motion_queuing.wipe_trapq(self.trapq)
+        self.rail.set_position([self.commanded_pos, 0., 0.])
+        self.sync_print_time()
+
+    def get_kinematics(self):
+        return self
+    
+    def get_steppers(self):
+        return self.steppers
+    
+    def calc_position(self, stepper_positions):
+        return [stepper_positions[self.rail.get_name()], 0., 0.]
+
+
 def load_config_prefix(config):
     return DualEndstopStepper(config)
