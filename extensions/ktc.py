@@ -161,9 +161,21 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         )
         self._register_tool_gcode_commands()
 
-        # Defined by MalaSchir
-        self.gcode.run_script_from_command("PRINT_TCHEAD_STATE")
-        # End of Defined by MalaSchir
+# Defined by MalaSchir
+        waketime = self.reactor.monotonic() + 2.0
+        self.reactor.register_timer(self._startup_check, waketime)
+        
+    def _startup_check(self, eventtime):
+        buttons = {
+            'tchead_dock': self.printer.lookup_object('gcode_button tchead_dock').get_status(eventtime)['state'],
+            't0_dock': self.printer.lookup_object('gcode_button t0_dock').get_status(eventtime)['state'],
+            't1_dock': self.printer.lookup_object('gcode_button t1_dock').get_status(eventtime)['state'],
+            't2_dock': self.printer.lookup_object('gcode_button t2_dock').get_status(eventtime)['state'],
+            't3_dock': self.printer.lookup_object('gcode_button t3_dock').get_status(eventtime)['state'],
+        }
+        self.log.always("Button states: %s" % str(buttons))
+        return self.reactor.NEVER    
+# End of Defined by MalaSchir
         
     def _config_default_toolchanger(self):
         """Set the default toolchanger and validate it."""
