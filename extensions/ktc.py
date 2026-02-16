@@ -155,6 +155,9 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
     def _handle_ready(self):
         """This method is called when the printer is ready to print."""
         # Initialize all toolchangers that have init_mode == ON_START.
+        # OSCHIR
+        self.log.always("KTC === _handle_ready === START")
+        # OSCHIR
         self._recursive_initialize_toolchangers(
             self.default_toolchanger,
             self.default_toolchanger.__class__.InitModeType.ON_START,
@@ -164,7 +167,10 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
 # Defined by MalaSchir
         waketime = self.reactor.monotonic() + 2.0
         self.reactor.register_timer(self._startup_check, waketime)
-        
+        # OSCHIR
+        self.log.always("KTC === _handle_ready === END")
+        # OSCHIR
+
     def _startup_check(self, eventtime):
         buttons = {
             'tchead_dock': self.printer.lookup_object('gcode_button tchead_dock').get_status(eventtime)['state'],
