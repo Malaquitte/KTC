@@ -6,11 +6,12 @@
 # This file may be distributed under the terms of the GNU GPLv3 license.
 #
 
+from __future__ import annotations
+
 # OSCHIR
 import time
 # OSCHIR
 
-from __future__ import annotations
 import typing
 # import cProfile, pstats, io
 
