@@ -5,6 +5,11 @@
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 #
+
+# OSCHIR
+import time
+# OSCHIR
+
 from __future__ import annotations
 import typing
 # import cProfile, pstats, io
@@ -165,9 +170,23 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         self._register_tool_gcode_commands()
 
 # Defined by MalaSchir
+        # OSCHIR
+        self.log.always("KTC === _handle_ready === Calling startup check in 2 seconds to log button states")
+        # OSCHIR
+        
         waketime = self.reactor.monotonic() + 2.0
         self.reactor.register_timer(self._startup_check, waketime)
+
         # OSCHIR
+        self.log.always("KTC === _handle_ready === Waiting 30s")
+
+        time.sleep(30)
+
+        self.log.always("KTC === _handle_ready === Calling startup check in 2s after 30s to log button states")
+
+        waketime = self.reactor.monotonic() + 2.0
+        self.reactor.register_timer(self._startup_check, waketime)
+
         self.log.always("KTC === _handle_ready === END")
         # OSCHIR
 
@@ -180,7 +199,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             't3_dock': self.printer.lookup_object('gcode_button t3_dock').get_status(eventtime)['state'],
         }
         self.log.always("Button states: %s" % str(buttons))
-        return self.reactor.NEVER    
+        return self.reactor.NEVER
+   
 # End of Defined by MalaSchir
         
     def _config_default_toolchanger(self):
