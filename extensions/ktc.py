@@ -163,7 +163,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         """This method is called when the printer is ready to print."""
         # Initialize all toolchangers that have init_mode == ON_START.
         # OSCHIR
-        #self.log.always("KTC-> _handle_ready() === START")
+        self.log.always("KTC-> _handle_ready() === START")
         # OSCHIR
         self._recursive_initialize_toolchangers(
             self.default_toolchanger,
@@ -173,7 +173,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         
         ########################################## Defined by MalaSchir       
         # OSCHIR
-        #self.log.always("KTC->_handle_ready() === scheduling execution of XXXXXXX to 15s after [%s]" % self.reactor.monotonic())
+        self.log.always("KTC->_handle_ready() === scheduling execution of XXXXXXX to 15s after [%s]" % self.reactor.monotonic())
         #self.reactor.register_async_callback(self._startup_check, self.reactor.monotonic() + 15.0)
 
         #self.log.always("KTC->_handle_ready() === END")
