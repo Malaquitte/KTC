@@ -9,7 +9,6 @@
 from __future__ import annotations
 
 # OSCHIR
-import logging
 import time
 # OSCHIR
 
@@ -163,33 +162,47 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         """This method is called when the printer is ready to print."""
         # Initialize all toolchangers that have init_mode == ON_START.
         # OSCHIR
-        #self.log.always("KTC-> _handle_ready() === START")
+        self.log.always("KTC === _handle_ready === START")
         # OSCHIR
         self._recursive_initialize_toolchangers(
             self.default_toolchanger,
             self.default_toolchanger.__class__.InitModeType.ON_START,
         )
         self._register_tool_gcode_commands()
-        
-        ########################################## Defined by MalaSchir       
-        # OSCHIR
-        #self.log.always("KTC->_handle_ready() === scheduling execution of XXXXXXX to 15s after [%s]" % self.reactor.monotonic())
-        #self.reactor.register_async_callback(self._startup_check, self.reactor.monotonic() + 15.0)
 
-        #self.log.always("KTC->_handle_ready() === END")
+# Defined by MalaSchir
+        # OSCHIR
+        self.log.always("KTC === _handle_ready === Calling startup check in 2 seconds to log button states")
+        # OSCHIR
+        
+        waketime = self.reactor.monotonic() + 2.0
+        self.reactor.register_timer(self._startup_check, waketime)
+
+        # OSCHIR
+        self.log.always("KTC === _handle_ready === Waiting 30s")
+
+        time.sleep(30)
+
+        self.log.always("KTC === _handle_ready === Calling startup check in 2s after 30s to log button states")
+
+        waketime = self.reactor.monotonic() + 2.0
+        self.reactor.register_timer(self._startup_check, waketime)
+
+        self.log.always("KTC === _handle_ready === END")
         # OSCHIR
 
     def _startup_check(self, eventtime):
-        macro_name = "PRINT_TCHEAD_STATE"
-        self.log.always("KTC === KTC->_startup_check() === Called at [%s]" % self.reactor.monotonic())
-        try:
-            self.gcode.run_script_from_command(macro_name)
-        except Exception as e:
-            msg = "Impossible d'exécuter %s: %s" % (macro_name, str(e))
-            logging.warning(msg)
-            self.gcode.respond_info(msg)    
-        self.log.always("KTC === KTC->_startup_check() === END at [%s]" % self.reactor.monotonic())
-        ######################################### End of Defined by MalaSchir
+        buttons = {
+            'tchead_dock': self.printer.lookup_object('gcode_button tchead_dock').get_status(eventtime)['state'],
+            't0_dock': self.printer.lookup_object('gcode_button t0_dock').get_status(eventtime)['state'],
+            't1_dock': self.printer.lookup_object('gcode_button t1_dock').get_status(eventtime)['state'],
+            't2_dock': self.printer.lookup_object('gcode_button t2_dock').get_status(eventtime)['state'],
+            't3_dock': self.printer.lookup_object('gcode_button t3_dock').get_status(eventtime)['state'],
+        }
+        self.log.always("Button states: %s" % str(buttons))
+        return self.reactor.NEVER
+   
+# End of Defined by MalaSchir
         
     def _config_default_toolchanger(self):
         """Set the default toolchanger and validate it."""
