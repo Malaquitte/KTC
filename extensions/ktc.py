@@ -180,7 +180,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         # OSCHIR
 
     def _startup_check(self, eventtime):
-        macro_name = "PRINT_TCHEAD_STATE"
+        macro_name = "KTC_STARTUP_CHECK"
         self.log.always("KTC === KTC->_startup_check() === Called at [%s]" % self.reactor.monotonic())
         try:
             self.gcode.run_script_from_command(macro_name)
