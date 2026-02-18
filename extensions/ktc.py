@@ -174,9 +174,9 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         ########################################## Defined by MalaSchir       
         # OSCHIR
         self.log.always("KTC->_handle_ready() === scheduling execution of XXXXXXX to 15s after [%s]" % self.reactor.monotonic())
-        #self.reactor.register_async_callback(self._startup_check, self.reactor.monotonic() + 15.0)
+        self.reactor.register_async_callback(self._startup_check, self.reactor.monotonic() + 15.0)
 
-        #self.log.always("KTC->_handle_ready() === END")
+        self.log.always("KTC->_handle_ready() === END")
         # OSCHIR
 
     def _startup_check(self, eventtime):
