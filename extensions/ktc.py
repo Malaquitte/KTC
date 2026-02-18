@@ -183,7 +183,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         macro_name = "PRINT_TCHEAD_STATE"
         self.log.always("KTC === KTC->_startup_check() === Called at [%s]" % self.reactor.monotonic())
         try:
-            self.gcode.run_gcode(macro_name)
+            self.gcode.run_script_from_command(macro_name)
         except Exception as e:
             msg = "Impossible d'exécuter %s: %s" % (macro_name, str(e))
             logging.warning(msg)
