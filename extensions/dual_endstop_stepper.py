@@ -150,8 +150,8 @@ class DualEndstopStepper:
             endstops = self.rail.get_endstops()
         
         phoming = self.printer.lookup_object('homing')
-        phoming.manual_home(self, endstops, pos, speed,
-                            triggered, check_trigger)
+        phoming.manual_home(self, None, endstops, pos, speed,
+                            False, triggered, check_trigger)
 
     cmd_DUAL_ENDSTOP_STEPPER_help = "Command a manually configured stepper with two endstops"
     def cmd_DUAL_ENDSTOP_STEPPER(self, gcmd):
