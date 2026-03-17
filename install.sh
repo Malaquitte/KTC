@@ -129,6 +129,35 @@ verify_ready()
     fi
 }
 
+#
+# Logic to check and install numpy >= 2.2.2
+#
+check_numpy() {
+    log_blank
+    log_header "Checking numpy version..."
+    NUMPY_MIN="2.2.2"
+    NUMPY_OK=false
+
+    if python3 -c "import numpy" 2>/dev/null; then
+        NUMPY_VER=$(python3 -c "import numpy; print(numpy.__version__)")
+        # Compare versions using sort -V
+        if [ "$(printf '%s\n' "$NUMPY_MIN" "$NUMPY_VER" | sort -V | head -n1)" = "$NUMPY_MIN" ]; then
+            log_info "numpy ${NUMPY_VER} is installed and meets the minimum requirement (>= ${NUMPY_MIN})"
+            NUMPY_OK=true
+        else
+            log_important "numpy ${NUMPY_VER} is installed but is below the minimum required version (${NUMPY_MIN})"
+        fi
+    else
+        log_important "numpy is not installed"
+    fi
+
+    if [ "$NUMPY_OK" = false ]; then
+        log_header "Installing numpy >= ${NUMPY_MIN}..."
+        pip3 install "numpy>=${NUMPY_MIN}"
+        log_info "numpy installed successfully"
+    fi
+}
+
 function nextfilename {
     local name="$1"
     if [ -d "${name}" ]; then
@@ -310,6 +339,8 @@ install_klipper_config() {
     #    log_error "Optional RRF compability files already exists in ${KLIPPER_CONFIG_HOME}/ktc/optional_rrf_compability - skipping copying it there"
     #fi
     
+    
+
     # Restart Klipper
     restart_klipper
 
@@ -394,8 +425,6 @@ case $yn in
         ;;
 esac
 
-
-
 # Make sure we aren't running as root
 verify_ready
 
@@ -404,6 +433,9 @@ check_klipper
 
 # Check that the home directories are valid
 verify_home_dirs
+
+# Check and install numpy if needed
+check_numpy
 
 # Link the extension to Klipper
 link_extension
