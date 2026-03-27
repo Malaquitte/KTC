@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 # OSCHIR
+from json import tool
 import logging
 import time
 # OSCHIR
@@ -153,6 +154,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             "KTC_TOOL_MAP_NR",
             "KTC_DEBUG_HEATERS",
             "KTC_DEBUG_TOOLS",
+            "KTC_DEBUG_TOOLCHANGERS"
         ]
         for cmd in handlers:
             func = getattr(self, "cmd_" + cmd)
@@ -1126,7 +1128,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
     def cmd_KTC_DEBUG_TOOLS(
         self, gcmd
     ):  # pylint: disable=invalid-name, unused-argument
-        self.log.always("KTC Debugging Heaters:")
+        self.log.always("KTC Debugging Tools:")
         for tool in self.all_tools.values():
             if tool in self.INVALID_TOOLS:
                 continue
@@ -1148,6 +1150,18 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
                 + f"- Time spent selecting: {self.log.seconds_to_human_string(time_selecting)}\n"
                 + f"- Time spent deselecting: \
                     {self.log.seconds_to_human_string(time_deselecting)}\n"
+            )
+
+    cmd_KTC_DEBUG_TOOLCHANGERS_help = "Debugging toolchangers."
+    def cmd_KTC_DEBUG_TOOLCHANGERS(
+        self, gcmd
+    ):  # pylint: disable=invalid-name, unused-argument
+        self.log.always("KTC Debugging Toolchangers:")
+        for toolchanger in self.all_toolchangers.values():
+            self.log.always(
+                f"KTC_TOOLCHANGER {toolchanger.name}:\n"
+                + f"- state: {toolchanger.state}\n"
+                + f"- selected tool: {toolchanger.selected_tool}\n"
             )
 
 def load_config(config):
