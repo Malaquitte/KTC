@@ -1161,7 +1161,7 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
             self.log.always(
                 f"KTC_TOOLCHANGER {toolchanger.name}:\n"
                 + f"- state: {toolchanger.state}\n"
-                + f"- selected tool: {toolchanger.selected_tool}\n"
+                + f"- selected tool: {toolchanger.selected_tool.name}\n"
             )
 
 def load_config(config):
