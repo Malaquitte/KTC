@@ -729,8 +729,8 @@ class Ktc(KtcBaseClass, KtcConstantsClass):
         try:
             tool = self.get_tool_from_gcmd(gcmd)
 
-            stdb_tmp = gcmd.get_int("STDB_TMP", None, minval=0)
-            actv_tmp = gcmd.get_int("ACTV_TMP", None, minval=0)
+            stdb_tmp = gcmd.get_float("STDB_TMP", None, minval=0)
+            actv_tmp = gcmd.get_float("ACTV_TMP", None, minval=0)
             chng_state = typing.cast(str, gcmd.get("CHNG_STATE", None))
             stdb_timeout = gcmd.get_float("STDB_TIMEOUT", None, minval=0)
             shtdwn_timeout = gcmd.get_float("SHTDWN_TIMEOUT", None, minval=0)
