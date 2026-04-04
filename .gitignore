@@ -129,7 +129,7 @@ env.bak/
 venv.bak/
 
 #repertoire config Hevort
-.config-hevort/
+config-hevort/
 
 # Spyder project settings
 .spyderproject
