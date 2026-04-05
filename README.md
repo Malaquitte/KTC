@@ -1,9 +1,9 @@
 <p align="center">
-  <h1 align="center">KTC - Klipper Toolchanger Code <sub>v.2</sub></h1>
+  <h1 align="center">KTC - Klipper Toolchanger Code <sub>v.0.1</sub></h1>
 </p>
 
 <p align="center">
-Universal Toolchanger helper for Klipper
+Universal Toolchanger for Klipper by Salagamor & Malaquitte
 </p>
 
 <p align="center">
@@ -24,11 +24,11 @@ Universal Toolchanger helper for Klipper
   </a>
 </p>
 
-This is a fork of [KTC V2](https://github.com/TypQxQ/KTC). This version takes into account multiple endstop states to determine the proper functioning of the toolchanger.
+This is a fork of [KTC V2](https://github.com/TypQxQ/KTC). This version takes into account multiple endstop states to determine the proper functioning of an unique toolchanger.
 
 ## ![#f98b00](/doc/f98b00.png) ![#fe3263](/doc/fe3263.png) ![#0fefa9](/doc/0fefa9.png) ![#085afe](/doc/085afe.png) Installation
 
-The code requires Klipper to run on Python v.3 only.
+The code requires Klipper to run on Python v.3 and above.
 
 ### 1\. Automatic install with Moonraker autoupdate support
 Connect to your klipper machine using SSH and run this one line command:
@@ -44,8 +44,6 @@ Copy or link the python (`*.py`) files into the `\klipper\klippy\extras` directo
 Copy base, config, macros and optional_rrf_compatibility folders inside ktc folder and reference them in printer.cfg as below.
 
 ```
-[include ktc/base/*.cfg]
 [include ktc/config/*.cfg]
 [include ktc/macros/*.cfg]
-[include ktc/optional_rrf_compatibility/*.cfg]
 ```
